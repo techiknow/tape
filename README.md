@@ -16,3 +16,11 @@ A zero-dependency, client-side mortgage acceleration simulator designed to model
 - **Milestone Inspector**: Interactive scrub and click-to-pin crosshair with two-way chart-to-table synchronization.
 - **Amortization Ledger**: Annual rollup view with lazy 12-month accordion expansion and RFC-4180 CSV export.
 - **Zero Dependencies**: Pure HTML, CSS, and Vanilla JavaScript with strict CSP compliance.
+
+---
+
+## Source & Repository
+
+- **GitHub Repository**: [https://github.com/techiknow/tape](https://github.com/techiknow/tape)
+- **License**: MIT
+
