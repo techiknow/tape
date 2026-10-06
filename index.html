@@ -1,0 +1,2246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src data:; script-src 'unsafe-inline'; connect-src 'none';">
+<title>T.A.P.E. - Tiered Amortization & Prepayment Engine</title>
+<style>
+  /* Google Sans Font Loading */
+  @font-face {
+    font-family: 'Google Sans';
+    src: url('https://fonts.gstatic.com/s/googlesans/v58/4UaRrENHsxJlGDuGo1OIlJfC6l_24rlCK1Yo_Iq2vgCI.woff2') format('woff2');
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght,ROND@100..900,0..100&display=swap');
+
+  /* Design System Tokens */
+  :root {
+    --ff-sans: 'Google Sans Flex', 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --ff-mono: 'SF Mono', 'Menlo', 'Consolas', monospace;
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+
+    --primary: #2563eb;
+    --on-primary: #ffffff;
+    --primary-container: #dbeafe;
+    --on-primary-container: #1e3a8a;
+    --secondary: #7c3aed;
+    --on-secondary: #ffffff;
+    --secondary-container: #ede9fe;
+    --tertiary: #059669;
+    --on-tertiary: #ffffff;
+    --tertiary-container: #d1fae5;
+
+    --surface: #f8fafc;
+    --surface-bright: #ffffff;
+    --surface-dim: #f1f5f9;
+    --surface-container: #f1f5f9;
+    --surface-container-high: #e2e8f0;
+    --surface-container-highest: #cbd5e1;
+    --surface-container-low: #f8fafc;
+    --surface-container-lowest: #ffffff;
+    --on-surface-default: #0f172a;
+    --on-surface-de-emphasis: #64748b;
+    --on-surface-primary: #2563eb;
+
+    --outline: #94a3b8;
+    --outline-variant: #cbd5e1;
+    --stroke-default: #e2e8f0;
+    --stroke-emphasis: #64748b;
+    --positive: #16a34a;
+    --positive-bg: #dcfce7;
+    --negative: #dc2626;
+    --warning: #d97706;
+
+    --chart-1: #3b82f6;
+    --chart-2: #10b981;
+    --chart-3: #f59e0b;
+    --chart-4: #ef4444;
+    --chart-pinned: #8b5cf6;
+    --chart-accent: #f59e0b;
+
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: #0b0f19;
+      --surface-bright: #131b2e;
+      --surface-dim: #090d16;
+      --surface-container: #162036;
+      --surface-container-high: #1e2c4a;
+      --surface-container-highest: #28395e;
+      --surface-container-low: #0f172a;
+      --surface-container-lowest: #070a10;
+      --on-surface-default: #f8fafc;
+      --on-surface-de-emphasis: #94a3b8;
+      --on-surface-primary: #60a5fa;
+      --primary: #60a5fa;
+      --on-primary: #0f172a;
+      --primary-container: #1e3a8a;
+      --on-primary-container: #dbeafe;
+      --outline: #64748b;
+      --outline-variant: #334155;
+      --stroke-default: #1e293b;
+      --stroke-emphasis: #64748b;
+      --positive: #34d399;
+      --positive-bg: #064e3b;
+      --negative: #f87171;
+      --warning: #fbbf24;
+      --chart-1: #60a5fa;
+      --chart-2: #34d399;
+      --chart-3: #fbbf24;
+      --chart-4: #f87171;
+      --chart-pinned: #a78bfa;
+      --chart-accent: #fbbf24;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  body {
+    font-family: var(--ff-sans);
+    background: var(--surface);
+    color: var(--on-surface-default);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .widget {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  @media (min-width: 768px) {
+    .widget { padding: 32px 32px 64px; }
+  }
+
+  /* Header & Summary Cards */
+  .widget-header {
+    margin-bottom: 24px;
+  }
+  .widget-title {
+    font-size: 24px;
+    font-weight: var(--fw-semibold);
+    letter-spacing: -0.5px;
+    color: var(--on-surface-default);
+  }
+  .widget-subtitle {
+    font-size: 14px;
+    color: var(--on-surface-de-emphasis);
+    margin-top: 4px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .summary-card {
+    background: var(--surface-bright);
+    border: 1px solid var(--stroke-default);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .summary-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+  .summary-label {
+    font-size: 12px;
+    font-weight: var(--fw-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--on-surface-de-emphasis);
+    margin-bottom: 6px;
+  }
+  .summary-val {
+    font-size: 24px;
+    font-weight: var(--fw-semibold);
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+    color: var(--on-surface-default);
+    line-height: 1.2;
+  }
+  .summary-val.positive { color: var(--positive); }
+  .summary-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: var(--fw-medium);
+    padding: 3px 8px;
+    border-radius: 6px;
+    margin-top: 8px;
+    width: fit-content;
+  }
+  .summary-badge.green {
+    background: var(--positive-bg);
+    color: var(--positive);
+  }
+  .summary-badge.blue {
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+  }
+
+  /* Chart Section */
+  .chart-card {
+    background: var(--surface-bright);
+    border: 1px solid var(--stroke-default);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow-sm);
+  }
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .chart-title-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chart-title {
+    font-size: 16px;
+    font-weight: var(--fw-semibold);
+  }
+  .pin-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--surface-container-high);
+    color: var(--on-surface-de-emphasis);
+    font-weight: var(--fw-medium);
+  }
+  .pin-status-badge.pinned {
+    background: var(--secondary-container);
+    color: var(--secondary);
+  }
+  .btn-unpin {
+    background: transparent;
+    border: none;
+    color: var(--secondary);
+    font-size: 13px;
+    font-weight: var(--fw-semibold);
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 4px;
+  }
+  .btn-unpin:hover { text-decoration: underline; }
+
+  .chart-section {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    user-select: none;
+  }
+  .chart-section svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* SVG Styling */
+  .axis-label {
+    font-family: var(--ff-sans);
+    fill: var(--on-surface-de-emphasis);
+    font-size: 14px;
+    font-weight: var(--fw-medium);
+  }
+  .axis-tick {
+    font-family: var(--ff-sans);
+    fill: var(--on-surface-de-emphasis);
+    font-size: 12px;
+  }
+  .chart-curve-baseline {
+    stroke: var(--chart-1);
+    stroke-width: 2.5;
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .chart-curve-accel {
+    stroke: var(--chart-2);
+    stroke-width: 3;
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .chart-curve-int-baseline {
+    stroke: var(--chart-4);
+    stroke-width: 2.2;
+    stroke-dasharray: 5 4;
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+  .chart-curve-int-accel {
+    stroke: var(--chart-3);
+    stroke-width: 2.8;
+    fill: none;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  /* Legend */
+  .legend-section {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--on-surface-de-emphasis);
+  }
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* Milestone / Point-in-time Inspector Table Card */
+  .milestone-card {
+    background: var(--surface-bright);
+    border: 1px solid var(--stroke-default);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow-sm);
+  }
+  .milestone-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .milestone-title {
+    font-size: 16px;
+    font-weight: var(--fw-semibold);
+  }
+  .milestone-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: var(--fw-medium);
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: var(--surface-container-high);
+    color: var(--on-surface-default);
+  }
+  .milestone-pill.pinned {
+    background: var(--secondary-container);
+    color: var(--secondary);
+    font-weight: var(--fw-semibold);
+  }
+
+  /* Table Design */
+  .data-table-container {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--stroke-default);
+    border-radius: 10px;
+    background: var(--surface-bright);
+  }
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+  }
+  .data-table th {
+    background: var(--surface-container);
+    color: var(--on-surface-de-emphasis);
+    font-weight: var(--fw-medium);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--stroke-default);
+    white-space: nowrap;
+  }
+  .data-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--stroke-default);
+    white-space: nowrap;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover { background: var(--surface-dim); }
+  .data-table .highlight-green {
+    color: var(--positive);
+    font-weight: var(--fw-medium);
+  }
+
+  /* Parameters & Sliders */
+  .section-card {
+    background: var(--surface-bright);
+    border: 1px solid var(--stroke-default);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow-sm);
+  }
+  .section-title {
+    font-size: 18px;
+    font-weight: var(--fw-semibold);
+    margin-bottom: 4px;
+  }
+  .section-desc {
+    font-size: 13px;
+    color: var(--on-surface-de-emphasis);
+    margin-bottom: 20px;
+  }
+
+  .slider-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 18px 24px;
+  }
+  @media (min-width: 600px) {
+    .slider-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  .slider-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .slider-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .slider-label {
+    font-size: 13px;
+    font-weight: var(--fw-medium);
+    color: var(--on-surface-default);
+  }
+  .slider-control {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none; appearance: none;
+    flex: 1; height: 32px; margin: 0; background: transparent;
+    border-radius: 999px; outline: none; cursor: pointer;
+  }
+  input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    background: linear-gradient(
+      to right,
+      var(--primary) 0%, var(--primary) var(--progress, 50%),
+      var(--surface-container-high) var(--progress, 50%), var(--surface-container-high) 100%
+    );
+    border-radius: 999px;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--surface-bright); border: 3px solid var(--primary);
+    box-sizing: border-box; margin-top: -7px; cursor: pointer;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    transition: transform 0.1s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+  .slider-value {
+    font-size: 14px; font-weight: var(--fw-medium);
+    font-family: var(--ff-sans); width: 88px; flex-shrink: 0; text-align: right;
+    font-variant-numeric: tabular-nums;
+    background: var(--surface-container); color: var(--on-surface-default);
+    padding: 6px 10px; border-radius: 8px;
+    border: 1px solid var(--stroke-default);
+    outline: none; transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+  .slider-value:focus {
+    border-color: var(--primary);
+    background: var(--surface-bright);
+  }
+
+  /* Prepayment Tiers UI */
+  .tiers-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .tier-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface-container-low);
+    border: 1px solid var(--stroke-default);
+    border-radius: 10px;
+    flex-wrap: wrap;
+    transition: background 0.15s ease;
+  }
+  .tier-row:hover { background: var(--surface-container); }
+  .tier-badge {
+    font-size: 12px;
+    font-weight: var(--fw-semibold);
+    background: var(--primary-container);
+    color: var(--on-primary-container);
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .tier-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex: 1;
+  }
+  .tier-type-select {
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: var(--fw-medium);
+    background: var(--surface-bright);
+    color: var(--on-surface-default);
+    border: 1px solid var(--outline-variant);
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+  }
+  .tier-type-select:focus { border-color: var(--primary); }
+
+  .badge-lump-sum {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: var(--fw-semibold);
+    background: var(--secondary-container);
+    color: var(--secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+
+  .tier-input-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--on-surface-de-emphasis);
+  }
+  .tier-num-input {
+    width: 64px;
+    padding: 6px 8px;
+    font-size: 13px;
+    font-weight: var(--fw-medium);
+    font-variant-numeric: tabular-nums;
+    background: var(--surface-bright);
+    color: var(--on-surface-default);
+    border: 1px solid var(--outline-variant);
+    border-radius: 6px;
+    outline: none;
+    text-align: center;
+  }
+  .tier-num-input:focus { border-color: var(--primary); }
+  .tier-amt-input {
+    width: 100px;
+    padding: 6px 8px;
+    font-size: 13px;
+    font-weight: var(--fw-semibold);
+    font-variant-numeric: tabular-nums;
+    background: var(--surface-bright);
+    color: var(--on-surface-default);
+    border: 1px solid var(--outline-variant);
+    border-radius: 6px;
+    outline: none;
+    text-align: right;
+  }
+  .tier-amt-input:focus { border-color: var(--primary); }
+  .tier-summary {
+    font-size: 12px;
+    color: var(--positive);
+    font-weight: var(--fw-medium);
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .btn-remove-tier {
+    background: transparent;
+    border: 1px solid var(--outline-variant);
+    color: var(--negative);
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.15s ease;
+  }
+  .btn-remove-tier:hover {
+    background: #fee2e2;
+    border-color: var(--negative);
+  }
+
+  .tier-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    background: var(--primary);
+    color: var(--on-primary);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity 0.15s ease;
+  }
+  .btn-primary:hover { opacity: 0.9; }
+  .btn-secondary {
+    background: var(--surface-container);
+    color: var(--on-surface-default);
+    border: 1px solid var(--stroke-default);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-secondary:hover { background: var(--surface-container-high); }
+
+  /* Amortization Table Section */
+  .table-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .view-toggles {
+    display: flex;
+    gap: 8px;
+    background: var(--surface-container);
+    padding: 3px;
+    border-radius: 8px;
+  }
+  .toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--on-surface-de-emphasis);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: var(--fw-medium);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .toggle-btn.active {
+    background: var(--surface-bright);
+    color: var(--on-surface-default);
+    box-shadow: var(--shadow-sm);
+    font-weight: var(--fw-semibold);
+  }
+
+  .schedule-container {
+    max-height: 480px;
+    overflow-y: auto;
+    border: 1px solid var(--stroke-default);
+    border-radius: 10px;
+    background: var(--surface-bright);
+  }
+  .schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+  .schedule-table th {
+    position: sticky;
+    top: 0;
+    background: var(--surface-container);
+    color: var(--on-surface-de-emphasis);
+    font-weight: var(--fw-semibold);
+    padding: 10px 12px;
+    text-align: right;
+    border-bottom: 1px solid var(--stroke-default);
+    white-space: nowrap;
+    z-index: 2;
+  }
+  .schedule-table th:first-child, .schedule-table td:first-child {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: inherit;
+  }
+  .schedule-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--stroke-default);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .schedule-table tr.annual-row {
+    font-weight: var(--fw-semibold);
+    background: var(--surface-dim);
+    cursor: pointer;
+  }
+  .schedule-table tr.annual-row:hover { background: var(--surface-container-high); }
+  .schedule-table tr.monthly-row {
+    background: var(--surface-bright);
+    color: var(--on-surface-de-emphasis);
+  }
+  .schedule-table tr.monthly-row td:first-child {
+    padding-left: 28px;
+    color: var(--on-surface-default);
+  }
+  .schedule-table tr.monthly-row:hover {
+    background: var(--surface-container);
+    color: var(--on-surface-default);
+  }
+  .schedule-table tr.selected-row {
+    background: var(--secondary-container) !important;
+    color: var(--secondary) !important;
+  }
+  .expand-icon {
+    display: inline-block;
+    width: 14px;
+    font-size: 10px;
+    color: var(--on-surface-de-emphasis);
+    transition: transform 0.15s ease;
+  }
+  .expand-icon.open { transform: rotate(90deg); }
+
+  /* Tooltip */
+  .tooltip {
+    position: absolute;
+    background: var(--surface-bright);
+    border: 1px solid var(--outline-variant);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    box-shadow: var(--shadow-lg);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 100;
+    white-space: nowrap;
+    color: var(--on-surface-default);
+    line-height: 1.6;
+  }
+  .tooltip-value { font-weight: var(--fw-semibold); margin-left: 6px; font-variant-numeric: tabular-nums; }
+
+  .footer-note {
+    font-size: 12px;
+    color: var(--on-surface-de-emphasis);
+    line-height: 1.6;
+    margin-top: 24px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="widget" id="simWidget">
+  <!-- Header -->
+  <div class="widget-header">
+    <h1 class="widget-title">T.A.P.E.</h1>
+    <div class="widget-subtitle">Tiered Amortization & Prepayment Engine • Discrete Multi-Tier Mortgage Acceleration Simulator</div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-grid" id="summaryGrid">
+    <div class="summary-card">
+      <div class="summary-label">Initial Loan Principal</div>
+      <div class="summary-val" id="sumLoanPrincipal">$400,000</div>
+      <div class="summary-badge blue" id="sumAprBadge">7.75% APR • 30 Yrs</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Accelerated Payoff</div>
+      <div class="summary-val positive" id="sumAccelPayoff">--</div>
+      <div class="summary-badge green" id="sumTimeSavedBadge">--</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Total Interest Saved</div>
+      <div class="summary-val positive" id="sumInterestSaved">$0</div>
+      <div class="summary-badge green" id="sumPctInterestSaved">0% saved</div>
+    </div>
+    <div class="summary-card">
+      <div class="summary-label">Total Interest (Accel)</div>
+      <div class="summary-val" id="sumTotalAccelInterest">$0</div>
+      <div class="summary-badge blue" id="sumBaseInterestBadge">vs $0 Base</div>
+    </div>
+  </div>
+
+  <!-- Chart Card -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div class="chart-title-area">
+        <span class="chart-title">Remaining Balance Projection</span>
+        <span class="pin-status-badge" id="pinBadge">Hover or click to pin milestone</span>
+      </div>
+      <button class="btn-unpin" id="btnUnpin" style="display:none;" onclick="clearPinnedPeriod()">Reset Selection</button>
+    </div>
+
+    <div class="chart-section">
+      <svg id="simChart" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div class="legend-section">
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--chart-1);"></div>
+        <span>Baseline Balance</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--chart-2);"></div>
+        <span>Accelerated Balance</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--chart-4); border-top: 2px dashed #ffffff;"></div>
+        <span>Baseline Cumulative Interest</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--chart-3);"></div>
+        <span>Accelerated Cumulative Interest</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-dot" style="background: var(--chart-pinned);"></div>
+        <span>Selected Milestone Date</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Point-in-time / Selected Date Milestone Breakdown Table -->
+  <div class="milestone-card" id="milestoneCard">
+    <div class="milestone-header">
+      <span class="milestone-title">Point-in-Time Milestone Breakdown</span>
+      <span class="milestone-pill" id="milestonePill">Showing: Month 1 (Year 1, Mo 1)</span>
+    </div>
+    <div class="data-table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Financial Metric</th>
+            <th>Baseline Scenario</th>
+            <th>Accelerated Scenario</th>
+            <th>Variance / Savings</th>
+          </tr>
+        </thead>
+        <tbody id="milestoneTableBody">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Loan Parameters & Multi-Tier Prepayment Controls -->
+  <div class="section-card">
+    <div class="section-title">Core Loan Parameters</div>
+    <div class="section-desc">Adjust the standard mortgage terms before layering extra principal payments.</div>
+    <div class="slider-grid" id="coreSlidersGrid">
+      <!-- Sliders injected dynamically -->
+    </div>
+  </div>
+
+  <!-- Multi-Tier Extra Principal Manager -->
+  <div class="section-card">
+    <div class="section-title">Multi-Tier Extra Monthly Principal</div>
+    <div class="section-desc">
+      Schedule custom prepayment steps across specific loan years (e.g. Year 1: +$2,000/mo, Year 2: +$3,000/mo, Year 3-5: +$1,000/mo).
+    </div>
+
+    <div class="tiers-container" id="tiersListContainer">
+      <!-- Dynamic Tier Rows -->
+    </div>
+
+    <div class="tier-actions">
+      <button class="btn-primary" onclick="addNewTier('recurring')">+ Add Monthly Recurring Tier</button>
+      <button class="btn-primary" style="background: var(--secondary);" onclick="addNewTier('one_time')">+ Add One-Time Lump Sum</button>
+      <button class="btn-secondary" onclick="resetDefaultTiers()">Reset Example Prepayments</button>
+    </div>
+  </div>
+
+  <!-- Dynamic Amortization Schedule Table -->
+  <div class="section-card">
+    <div class="table-toolbar">
+      <div>
+        <div class="section-title">Amortization Schedule</div>
+        <div class="section-desc" style="margin-bottom: 0;">Discrete payment-by-payment ledger with principal curtailment.</div>
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <div class="view-toggles">
+          <button class="toggle-btn active" id="btnViewRollup" onclick="setScheduleView('rollup')">Annual Rollup (Expandable)</button>
+          <button class="toggle-btn" id="btnViewMonthly" onclick="setScheduleView('monthly')">Full Monthly (360 Mo)</button>
+        </div>
+        <button class="btn-secondary" onclick="exportScheduleCSV()">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="schedule-container" id="scheduleScrollContainer">
+      <table class="schedule-table">
+        <thead>
+          <tr>
+            <th>Period</th>
+            <th>Monthly / Annual Payment</th>
+            <th>Regular Principal</th>
+            <th>Extra Principal</th>
+            <th>Interest Paid</th>
+            <th>Ending Balance</th>
+            <th>Cumulative Interest</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleTableBody">
+          <!-- Populated dynamically -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    *Calculations use exact monthly interest discretization: $r = \text{APR}/1200$. Prepayments are applied immediately to principal curtailment with terminal period clamping.
+  </div>
+</div>
+
+<div class="tooltip" id="chartTooltip"></div>
+
+<script>
+  // ===================================================================
+  // 1. STATE & DATA INITIALIZATION
+  // ===================================================================
+  const coreParams = {
+    principal: 400000,
+    rate: 7.75,
+    years: 30
+  };
+
+  // Multi-tier extra monthly principal configuration
+  // Rule-based interval structure: { id, startYear, endYear, extraMonthly }
+  let prepaymentTiers = [
+    { id: 1, startYear: 1, endYear: 1, extraMonthly: 2000 },
+    { id: 2, startYear: 2, endYear: 2, extraMonthly: 3000 }
+  ];
+
+  // Selection & inspection state
+  let pinnedMonth = null;
+  let hoveredMonth = null;
+  let activeScheduleView = 'rollup'; // 'rollup' | 'monthly'
+  let expandedYears = new Set([1]); // Expand Year 1 by default in rollup
+
+  // Cached simulation results
+  let simulationData = null;
+
+  // Currency & formatting helpers
+  const currencyLocale = 'en-US';
+  const currencySymbol = '$';
+
+  function fmtCurrency(val, decimals = 0) {
+    if (!isFinite(val)) return '$0';
+    return currencySymbol + Math.round(val).toLocaleString(currencyLocale);
+  }
+
+  function fmtCompact(val) {
+    if (!isFinite(val)) return '$0';
+    const abs = Math.abs(val);
+    const sign = val < 0 ? '-' : '';
+    if (abs >= 1e6) return sign + currencySymbol + (abs / 1e6).toFixed(1) + 'M';
+    if (abs >= 1e3) return sign + currencySymbol + (abs / 1e3).toFixed(0) + 'K';
+    return sign + currencySymbol + Math.round(abs).toLocaleString(currencyLocale);
+  }
+
+  function fmtPercent(val) {
+    return (val || 0).toFixed(2) + '%';
+  }
+
+  // ===================================================================
+  // 2. DISCRETE DETERMINISTIC SIMULATION ENGINE
+  // ===================================================================
+  function computeAmortizationSchedule(principal, rate, termYears, tiers) {
+    const totalMonths = Math.max(1, Math.round(termYears * 12));
+    const monthlyRate = rate > 0 ? (rate / 100) / 12 : 0;
+
+    // Standard fixed monthly payment (P&I)
+    let baseMonthlyPayment = 0;
+    if (monthlyRate > 0) {
+      baseMonthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1);
+    } else {
+      baseMonthlyPayment = principal / totalMonths;
+    }
+
+    // Lookup extra principal for month m (1-based)
+    function getTierExtraForMonth(m) {
+      const year = Math.ceil(m / 12);
+      const mInYr = ((m - 1) % 12) + 1;
+      let recurringExtra = 0;
+      let oneTimeExtra = 0;
+
+      for (const tier of tiers) {
+        const type = tier.type || 'recurring';
+        if (type === 'recurring') {
+          const s = Number(tier.startYear) || 1;
+          const e = Number(tier.endYear) || termYears;
+          if (year >= s && year <= e) {
+            recurringExtra += Math.max(0, Number(tier.extraMonthly) || 0);
+          }
+        } else if (type === 'one_time') {
+          const tYr = Number(tier.year) || 1;
+          const tMo = Number(tier.month) || 1;
+          if (tYr === year && tMo === mInYr) {
+            oneTimeExtra += Math.max(0, Number(tier.amount) || 0);
+          }
+        }
+      }
+      return {
+        totalExtra: recurringExtra + oneTimeExtra,
+        recurringExtra,
+        oneTimeExtra
+      };
+    }
+
+    // Baseline Schedule (No Extra Payments)
+    const baselineMonthly = [];
+    let curBaseBal = principal;
+    let cumBaseInt = 0;
+    let cumBasePrin = 0;
+
+    baselineMonthly.push({
+      month: 0,
+      year: 0,
+      monthInYear: 0,
+      beginningBalance: principal,
+      payment: 0,
+      principalPaid: 0,
+      extraPrincipal: 0,
+      interestPaid: 0,
+      endingBalance: principal,
+      cumulativeInterest: 0,
+      cumulativePrincipal: 0
+    });
+
+    for (let m = 1; m <= totalMonths; m++) {
+      if (curBaseBal <= 0.005) {
+        baselineMonthly.push({
+          month: m,
+          year: Math.ceil(m / 12),
+          monthInYear: ((m - 1) % 12) + 1,
+          beginningBalance: 0,
+          payment: 0,
+          principalPaid: 0,
+          extraPrincipal: 0,
+          interestPaid: 0,
+          endingBalance: 0,
+          cumulativeInterest: cumBaseInt,
+          cumulativePrincipal: cumBasePrin
+        });
+        continue;
+      }
+
+      const begBal = curBaseBal;
+      const interest = curBaseBal * monthlyRate;
+      let schedPrin = baseMonthlyPayment - interest;
+      let pmt = baseMonthlyPayment;
+
+      if (schedPrin >= curBaseBal) {
+        schedPrin = curBaseBal;
+        pmt = schedPrin + interest;
+        curBaseBal = 0;
+      } else {
+        curBaseBal -= schedPrin;
+      }
+
+      cumBaseInt += interest;
+      cumBasePrin += schedPrin;
+
+      baselineMonthly.push({
+        month: m,
+        year: Math.ceil(m / 12),
+        monthInYear: ((m - 1) % 12) + 1,
+        beginningBalance: begBal,
+        payment: pmt,
+        principalPaid: schedPrin,
+        extraPrincipal: 0,
+        interestPaid: interest,
+        endingBalance: curBaseBal,
+        cumulativeInterest: cumBaseInt,
+        cumulativePrincipal: cumBasePrin
+      });
+    }
+
+    // Accelerated Schedule (With Tier Prepayments)
+    const accelMonthly = [];
+    let curAccelBal = principal;
+    let cumAccelInt = 0;
+    let cumAccelPrin = 0;
+    let payoffMonth = totalMonths;
+    let isPaidOff = false;
+
+    accelMonthly.push({
+      month: 0,
+      year: 0,
+      monthInYear: 0,
+      beginningBalance: principal,
+      payment: 0,
+      principalPaid: 0,
+      extraPrincipal: 0,
+      recurringExtra: 0,
+      oneTimeExtra: 0,
+      interestPaid: 0,
+      endingBalance: principal,
+      cumulativeInterest: 0,
+      cumulativePrincipal: 0
+    });
+
+    for (let m = 1; m <= totalMonths; m++) {
+      if (curAccelBal <= 0.005) {
+        if (!isPaidOff) {
+          payoffMonth = m - 1;
+          isPaidOff = true;
+        }
+        accelMonthly.push({
+          month: m,
+          year: Math.ceil(m / 12),
+          monthInYear: ((m - 1) % 12) + 1,
+          beginningBalance: 0,
+          payment: 0,
+          principalPaid: 0,
+          extraPrincipal: 0,
+          recurringExtra: 0,
+          oneTimeExtra: 0,
+          interestPaid: 0,
+          endingBalance: 0,
+          cumulativeInterest: cumAccelInt,
+          cumulativePrincipal: cumAccelPrin
+        });
+        continue;
+      }
+
+      const begBal = curAccelBal;
+      const interest = curAccelBal * monthlyRate;
+      const extraObj = getTierExtraForMonth(m);
+      const extra = extraObj.totalExtra;
+      let schedPrin = baseMonthlyPayment - interest;
+      let totalPrinTarget = schedPrin + extra;
+
+      let pmt = 0;
+      let actualSchedPrin = schedPrin;
+      let actualExtra = extra;
+      let actualRecurringExtra = extraObj.recurringExtra;
+      let actualOneTimeExtra = extraObj.oneTimeExtra;
+
+      if (totalPrinTarget >= curAccelBal) {
+        // Final payoff month clamping
+        if (schedPrin >= curAccelBal) {
+          actualSchedPrin = curAccelBal;
+          actualExtra = 0;
+          actualRecurringExtra = 0;
+          actualOneTimeExtra = 0;
+        } else {
+          actualSchedPrin = schedPrin;
+          actualExtra = curAccelBal - schedPrin;
+          if (actualRecurringExtra >= actualExtra) {
+            actualRecurringExtra = actualExtra;
+            actualOneTimeExtra = 0;
+          } else {
+            actualOneTimeExtra = actualExtra - actualRecurringExtra;
+          }
+        }
+        pmt = curAccelBal + interest;
+        curAccelBal = 0;
+        if (!isPaidOff) {
+          payoffMonth = m;
+          isPaidOff = true;
+        }
+      } else {
+        curAccelBal -= totalPrinTarget;
+        pmt = baseMonthlyPayment + extra;
+      }
+
+      const totalPrinPaid = actualSchedPrin + actualExtra;
+      cumAccelInt += interest;
+      cumAccelPrin += totalPrinPaid;
+
+      accelMonthly.push({
+        month: m,
+        year: Math.ceil(m / 12),
+        monthInYear: ((m - 1) % 12) + 1,
+        beginningBalance: begBal,
+        payment: pmt,
+        principalPaid: actualSchedPrin,
+        extraPrincipal: actualExtra,
+        recurringExtra: actualRecurringExtra,
+        oneTimeExtra: actualOneTimeExtra,
+        interestPaid: interest,
+        endingBalance: curAccelBal,
+        cumulativeInterest: cumAccelInt,
+        cumulativePrincipal: cumAccelPrin
+      });
+    }
+
+    if (!isPaidOff) payoffMonth = totalMonths;
+
+    // Annual Rollup Aggregations
+    const annualRollup = [];
+    for (let y = 1; y <= termYears; y++) {
+      const startM = (y - 1) * 12 + 1;
+      const endM = Math.min(y * 12, totalMonths);
+
+      let yrBasePmt = 0, yrBasePrin = 0, yrBaseInt = 0;
+      let yrAccelPmt = 0, yrAccelPrin = 0, yrAccelExtra = 0, yrAccelOneTime = 0, yrAccelInt = 0;
+
+      for (let m = startM; m <= endM; m++) {
+        yrBasePmt += baselineMonthly[m].payment;
+        yrBasePrin += baselineMonthly[m].principalPaid;
+        yrBaseInt += baselineMonthly[m].interestPaid;
+
+        yrAccelPmt += accelMonthly[m].payment;
+        yrAccelPrin += accelMonthly[m].principalPaid;
+        yrAccelExtra += accelMonthly[m].extraPrincipal;
+        yrAccelOneTime += accelMonthly[m].oneTimeExtra || 0;
+        yrAccelInt += accelMonthly[m].interestPaid;
+      }
+
+      annualRollup.push({
+        year: y,
+        startMonth: startM,
+        endMonth: endM,
+        baseline: {
+          beginningBalance: baselineMonthly[startM]?.beginningBalance || 0,
+          payment: yrBasePmt,
+          principalPaid: yrBasePrin,
+          extraPrincipal: 0,
+          interestPaid: yrBaseInt,
+          endingBalance: baselineMonthly[endM]?.endingBalance || 0,
+          cumulativeInterest: baselineMonthly[endM]?.cumulativeInterest || cumBaseInt
+        },
+        accelerated: {
+          beginningBalance: accelMonthly[startM]?.beginningBalance || 0,
+          payment: yrAccelPmt,
+          principalPaid: yrAccelPrin,
+          extraPrincipal: yrAccelExtra,
+          oneTimeExtra: yrAccelOneTime,
+          interestPaid: yrAccelInt,
+          endingBalance: accelMonthly[endM]?.endingBalance || 0,
+          cumulativeInterest: accelMonthly[endM]?.cumulativeInterest || cumAccelInt
+        }
+      });
+    }
+
+    return {
+      principal,
+      rate,
+      termYears,
+      totalMonths,
+      baseMonthlyPayment,
+      payoffMonth,
+      monthsSaved: totalMonths - payoffMonth,
+      totalBaselineInterest: cumBaseInt,
+      totalAcceleratedInterest: cumAccelInt,
+      interestSavings: Math.max(0, cumBaseInt - cumAccelInt),
+      baselineMonthly,
+      accelMonthly,
+      annualRollup
+    };
+  }
+
+  // ===================================================================
+  // 3. DECOUPLED EVENT HANDLING VIA requestAnimationFrame
+  // ===================================================================
+  let isRafScheduled = false;
+
+  function scheduleRecalculate(userInitiated = true) {
+    if (isRafScheduled) return;
+    isRafScheduled = true;
+    requestAnimationFrame(() => {
+      isRafScheduled = false;
+      recalculate(userInitiated);
+    });
+  }
+
+  function recalculate(userInitiated = false) {
+    // 1. Run simulation
+    simulationData = computeAmortizationSchedule(
+      coreParams.principal,
+      coreParams.rate,
+      coreParams.years,
+      prepaymentTiers
+    );
+
+    // 2. Validate pinned selection bound
+    if (pinnedMonth !== null && pinnedMonth > simulationData.totalMonths) {
+      pinnedMonth = simulationData.totalMonths;
+    }
+
+    // 3. Render all components
+    updateSummaryCards();
+    renderChart();
+    updateMilestoneTable();
+    renderAmortizationSchedule();
+
+    if (userInitiated) {
+      broadcastState();
+    }
+  }
+
+  // ===================================================================
+  // 4. SUMMARY CARDS
+  // ===================================================================
+  function updateSummaryCards() {
+    const d = simulationData;
+    document.getElementById('sumLoanPrincipal').textContent = fmtCurrency(d.principal);
+    document.getElementById('sumAprBadge').textContent = `${d.rate}% APR • ${d.termYears} Yrs`;
+
+    const payoffYears = Math.floor(d.payoffMonth / 12);
+    const payoffMonths = d.payoffMonth % 12;
+    const payoffStr = payoffMonths > 0 ? `${payoffYears} yrs ${payoffMonths} mos` : `${payoffYears} yrs`;
+    document.getElementById('sumAccelPayoff').textContent = payoffStr;
+
+    const savedYears = Math.floor(d.monthsSaved / 12);
+    const savedMonths = d.monthsSaved % 12;
+    let savedStr = 'Paid off on schedule';
+    if (d.monthsSaved > 0) {
+      savedStr = `${savedYears > 0 ? savedYears + ' yrs ' : ''}${savedMonths > 0 ? savedMonths + ' mos ' : ''}sooner!`;
+    }
+    document.getElementById('sumTimeSavedBadge').textContent = savedStr;
+
+    document.getElementById('sumInterestSaved').textContent = fmtCurrency(d.interestSavings);
+    const pctSaved = d.totalBaselineInterest > 0 ? (d.interestSavings / d.totalBaselineInterest) * 100 : 0;
+    document.getElementById('sumPctInterestSaved').textContent = `${pctSaved.toFixed(1)}% total saved`;
+
+    document.getElementById('sumTotalAccelInterest').textContent = fmtCurrency(d.totalAcceleratedInterest);
+    document.getElementById('sumBaseInterestBadge').textContent = `vs ${fmtCurrency(d.totalBaselineInterest)} Base`;
+  }
+
+  // ===================================================================
+  // 5. SVG CHART RENDERING & TWO-WAY SELECTION
+  // ===================================================================
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  let stickyYMax = null;
+
+  function createSvgNode(tag, attrs, text) {
+    const el = document.createElementNS(SVG_NS, tag);
+    if (attrs) {
+      for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, String(v));
+    }
+    if (text !== undefined) el.textContent = String(text);
+    return el;
+  }
+
+  function niceMax(maxVal) {
+    if (maxVal <= 0) return 100000;
+    const mag = Math.pow(10, Math.floor(Math.log10(maxVal)));
+    const res = maxVal / mag;
+    if (res <= 1.2) return 1.2 * mag;
+    if (res <= 1.5) return 1.5 * mag;
+    if (res <= 2) return 2 * mag;
+    if (res <= 3) return 3 * mag;
+    if (res <= 5) return 5 * mag;
+    if (res <= 7.5) return 7.5 * mag;
+    return 10 * mag;
+  }
+
+  function renderChart() {
+    const svg = document.getElementById('simChart');
+    const isMobile = window.innerWidth <= 600;
+    const SVG_W = isMobile ? 500 : 1000;
+    const SVG_H = isMobile ? 320 : 420;
+    const PAD = isMobile
+      ? { top: 30, bottom: 40, left: 65, right: 15 }
+      : { top: 40, bottom: 50, left: 85, right: 25 };
+
+    svg.setAttribute('viewBox', `0 0 ${SVG_W} ${SVG_H}`);
+    svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+    const d = simulationData;
+    const totalMonths = d.totalMonths;
+    const plotW = SVG_W - PAD.left - PAD.right;
+    const plotH = SVG_H - PAD.top - PAD.bottom;
+
+    const idealMax = niceMax(Math.max(
+      d.principal,
+      d.totalBaselineInterest,
+      d.totalAcceleratedInterest
+    ));
+    if (stickyYMax === null || idealMax > stickyYMax || idealMax < stickyYMax * 0.4) {
+      stickyYMax = idealMax;
+    }
+    const yMax = stickyYMax;
+
+    function xPos(m) {
+      return PAD.left + (m / totalMonths) * plotW;
+    }
+    function yPos(val) {
+      return PAD.top + plotH - (Math.max(0, val) / yMax) * plotH;
+    }
+
+    svg.replaceChildren();
+
+    // 1. Gridlines & Y-Axis Ticks
+    const yTickCount = 5;
+    for (let i = 0; i <= yTickCount; i++) {
+      const val = (yMax / yTickCount) * i;
+      const y = yPos(val);
+      if (i > 0) {
+        svg.appendChild(createSvgNode('line', {
+          x1: PAD.left, y1: y, x2: SVG_W - PAD.right, y2: y,
+          stroke: 'var(--stroke-default)', 'stroke-dasharray': '4 4', 'stroke-width': 1
+        }));
+      }
+      svg.appendChild(createSvgNode('text', {
+        x: PAD.left - 12, y: y + 4, 'text-anchor': 'end',
+        class: 'axis-tick'
+      }, fmtCompact(val)));
+    }
+
+    // 2. X-Axis Year Ticks
+    const yearInterval = Math.max(1, Math.ceil(d.termYears / 10));
+    for (let yr = 0; yr <= d.termYears; yr += yearInterval) {
+      const m = yr * 12;
+      const x = xPos(m);
+      svg.appendChild(createSvgNode('text', {
+        x, y: PAD.top + plotH + 22, 'text-anchor': 'middle',
+        class: 'axis-tick'
+      }, `Yr ${yr}`));
+      svg.appendChild(createSvgNode('line', {
+        x1: x, y1: PAD.top + plotH, x2: x, y2: PAD.top + plotH + 5,
+        stroke: 'var(--outline-variant)', 'stroke-width': 1
+      }));
+    }
+
+    // 3. Axis Lines
+    svg.appendChild(createSvgNode('line', {
+      x1: PAD.left, y1: PAD.top, x2: PAD.left, y2: PAD.top + plotH,
+      stroke: 'var(--outline-variant)', 'stroke-width': 1.5
+    }));
+    svg.appendChild(createSvgNode('line', {
+      x1: PAD.left, y1: PAD.top + plotH, x2: SVG_W - PAD.right, y2: PAD.top + plotH,
+      stroke: 'var(--outline-variant)', 'stroke-width': 1.5
+    }));
+
+    // 4. Area Fills & Line Paths
+    // Area under Accelerated Balance (var(--chart-2))
+    let accelAreaPath = `M ${xPos(0)},${yPos(d.accelMonthly[0].endingBalance)}`;
+    for (let m = 1; m <= totalMonths; m++) {
+      accelAreaPath += ` L ${xPos(m)},${yPos(d.accelMonthly[m].endingBalance)}`;
+    }
+    accelAreaPath += ` L ${xPos(totalMonths)},${yPos(0)} L ${xPos(0)},${yPos(0)} Z`;
+
+    svg.appendChild(createSvgNode('path', {
+      d: accelAreaPath,
+      fill: 'var(--chart-2)',
+      opacity: '0.12'
+    }));
+
+    // Area under Accelerated Cumulative Interest (var(--chart-3))
+    let accelIntAreaPath = `M ${xPos(0)},${yPos(d.accelMonthly[0].cumulativeInterest)}`;
+    for (let m = 1; m <= totalMonths; m++) {
+      accelIntAreaPath += ` L ${xPos(m)},${yPos(d.accelMonthly[m].cumulativeInterest)}`;
+    }
+    accelIntAreaPath += ` L ${xPos(totalMonths)},${yPos(0)} L ${xPos(0)},${yPos(0)} Z`;
+
+    svg.appendChild(createSvgNode('path', {
+      d: accelIntAreaPath,
+      fill: 'var(--chart-3)',
+      opacity: '0.08'
+    }));
+
+    // Baseline Balance Curve
+    let baseLinePath = `M ${xPos(0)},${yPos(d.baselineMonthly[0].endingBalance)}`;
+    for (let m = 1; m <= totalMonths; m++) {
+      baseLinePath += ` L ${xPos(m)},${yPos(d.baselineMonthly[m].endingBalance)}`;
+    }
+    svg.appendChild(createSvgNode('path', {
+      d: baseLinePath,
+      class: 'chart-curve-baseline'
+    }));
+
+    // Accelerated Balance Curve
+    let accelLinePath = `M ${xPos(0)},${yPos(d.accelMonthly[0].endingBalance)}`;
+    for (let m = 1; m <= totalMonths; m++) {
+      accelLinePath += ` L ${xPos(m)},${yPos(d.accelMonthly[m].endingBalance)}`;
+    }
+    svg.appendChild(createSvgNode('path', {
+      d: accelLinePath,
+      class: 'chart-curve-accel'
+    }));
+
+    // Baseline Cumulative Interest Curve (Dashed)
+    let baseIntPath = `M ${xPos(0)},${yPos(d.baselineMonthly[0].cumulativeInterest)}`;
+    for (let m = 1; m <= totalMonths; m++) {
+      baseIntPath += ` L ${xPos(m)},${yPos(d.baselineMonthly[m].cumulativeInterest)}`;
+    }
+    svg.appendChild(createSvgNode('path', {
+      d: baseIntPath,
+      class: 'chart-curve-int-baseline'
+    }));
+
+    // Accelerated Cumulative Interest Curve (Solid Amber)
+    let accelIntPath = `M ${xPos(0)},${yPos(d.accelMonthly[0].cumulativeInterest)}`;
+    for (let m = 1; m <= totalMonths; m++) {
+      accelIntPath += ` L ${xPos(m)},${yPos(d.accelMonthly[m].cumulativeInterest)}`;
+    }
+    svg.appendChild(createSvgNode('path', {
+      d: accelIntPath,
+      class: 'chart-curve-int-accel'
+    }));
+
+    // 5. Payoff Milestone Flag
+    if (d.payoffMonth < totalMonths) {
+      const pmX = xPos(d.payoffMonth);
+      const pmY = yPos(0);
+      svg.appendChild(createSvgNode('circle', {
+        cx: pmX, cy: pmY, r: 6,
+        fill: 'var(--positive)', stroke: 'var(--surface-bright)', 'stroke-width': 2
+      }));
+      svg.appendChild(createSvgNode('text', {
+        x: pmX, y: pmY - 10, 'text-anchor': 'middle',
+        'font-size': '11', 'font-weight': '600', fill: 'var(--positive)'
+      }, `Payoff: M${d.payoffMonth}`));
+    }
+
+    // 6. Pinned Selection Marker (Persistent)
+    const activeSelectedMonth = pinnedMonth !== null ? pinnedMonth : (hoveredMonth !== null ? hoveredMonth : 12);
+    if (activeSelectedMonth !== null && activeSelectedMonth <= totalMonths) {
+      const selX = xPos(activeSelectedMonth);
+      const bBal = d.baselineMonthly[activeSelectedMonth]?.endingBalance || 0;
+      const aBal = d.accelMonthly[activeSelectedMonth]?.endingBalance || 0;
+      const bInt = d.baselineMonthly[activeSelectedMonth]?.cumulativeInterest || 0;
+      const aInt = d.accelMonthly[activeSelectedMonth]?.cumulativeInterest || 0;
+
+      svg.appendChild(createSvgNode('line', {
+        x1: selX, y1: PAD.top, x2: selX, y2: PAD.top + plotH,
+        stroke: pinnedMonth !== null ? 'var(--chart-pinned)' : 'var(--outline)',
+        'stroke-width': pinnedMonth !== null ? 2 : 1.5,
+        'stroke-dasharray': pinnedMonth !== null ? 'none' : '4 4'
+      }));
+
+      // Balance Dots
+      svg.appendChild(createSvgNode('circle', {
+        cx: selX, cy: yPos(bBal), r: 5,
+        fill: 'var(--chart-1)', stroke: 'var(--surface-bright)', 'stroke-width': 2
+      }));
+      svg.appendChild(createSvgNode('circle', {
+        cx: selX, cy: yPos(aBal), r: 6,
+        fill: 'var(--chart-2)', stroke: 'var(--surface-bright)', 'stroke-width': 2
+      }));
+
+      // Interest Dots
+      svg.appendChild(createSvgNode('circle', {
+        cx: selX, cy: yPos(bInt), r: 5,
+        fill: 'var(--chart-4)', stroke: 'var(--surface-bright)', 'stroke-width': 2
+      }));
+      svg.appendChild(createSvgNode('circle', {
+        cx: selX, cy: yPos(aInt), r: 6,
+        fill: 'var(--chart-3)', stroke: 'var(--surface-bright)', 'stroke-width': 2
+      }));
+    }
+
+    // 7. Interactive Scrubbing & Click-to-Pin Overlay
+    const overlay = createSvgNode('rect', {
+      x: PAD.left, y: PAD.top, width: plotW, height: plotH,
+      fill: 'transparent', style: 'cursor: crosshair'
+    });
+
+    const tooltip = document.getElementById('chartTooltip');
+
+    overlay.onmousemove = (e) => {
+      const rect = svg.getBoundingClientRect();
+      const svgX = ((e.clientX - rect.left) / rect.width) * SVG_W;
+      const relX = Math.max(0, Math.min(plotW, svgX - PAD.left));
+      const m = Math.round((relX / plotW) * totalMonths);
+      hoveredMonth = Math.max(0, Math.min(totalMonths, m));
+
+      // Tooltip position & content
+      const yr = Math.ceil(hoveredMonth / 12);
+      const mInYr = ((hoveredMonth - 1) % 12) + 1;
+      const bBal = d.baselineMonthly[hoveredMonth]?.endingBalance || 0;
+      const aBal = d.accelMonthly[hoveredMonth]?.endingBalance || 0;
+      const bInt = d.baselineMonthly[hoveredMonth]?.cumulativeInterest || 0;
+      const aInt = d.accelMonthly[hoveredMonth]?.cumulativeInterest || 0;
+      const intSaved = Math.max(0, bInt - aInt);
+
+      tooltip.innerHTML = `
+        <div style="font-weight:600; margin-bottom:6px;">Year ${yr}, Month ${hoveredMonth > 0 ? mInYr : 0} (Month ${hoveredMonth})</div>
+        <div><span style="color:var(--chart-1);">●</span> Baseline Bal: <span class="tooltip-value">${fmtCurrency(bBal)}</span></div>
+        <div><span style="color:var(--chart-2);">●</span> Accelerated Bal: <span class="tooltip-value">${fmtCurrency(aBal)}</span></div>
+        <div style="margin-top:2px;"><span style="color:var(--chart-4);">●</span> Baseline Interest: <span class="tooltip-value">${fmtCurrency(bInt)}</span></div>
+        <div><span style="color:var(--chart-3);">●</span> Accel Interest: <span class="tooltip-value">${fmtCurrency(aInt)}</span> ${intSaved > 0 ? `<span style="color:var(--positive); font-weight:600;">(-${fmtCurrency(intSaved)})</span>` : ''}</div>
+        <div style="font-size:11px; color:var(--on-surface-de-emphasis); margin-top:6px;">Click to pin date</div>
+      `;
+      tooltip.style.opacity = '1';
+
+      const ttW = tooltip.offsetWidth || 210;
+      let left = e.pageX + 15;
+      if (left + ttW > window.innerWidth - 15) left = e.pageX - ttW - 15;
+      tooltip.style.left = left + 'px';
+      tooltip.style.top = (e.pageY + 15) + 'px';
+
+      if (pinnedMonth === null) {
+        updateMilestoneTable(hoveredMonth);
+      }
+    };
+
+    overlay.onmouseleave = () => {
+      hoveredMonth = null;
+      tooltip.style.opacity = '0';
+      if (pinnedMonth === null) {
+        updateMilestoneTable(12);
+      }
+    };
+
+    overlay.onclick = (e) => {
+      const rect = svg.getBoundingClientRect();
+      const svgX = ((e.clientX - rect.left) / rect.width) * SVG_W;
+      const relX = Math.max(0, Math.min(plotW, svgX - PAD.left));
+      const m = Math.round((relX / plotW) * totalMonths);
+      setPinnedPeriod(m);
+    };
+
+    svg.appendChild(overlay);
+  }
+
+  function setPinnedPeriod(monthIdx) {
+    pinnedMonth = Math.max(1, Math.min(simulationData.totalMonths, monthIdx));
+    document.getElementById('pinBadge').textContent = `Pinned: Month ${pinnedMonth} (Yr ${Math.ceil(pinnedMonth/12)})`;
+    document.getElementById('pinBadge').classList.add('pinned');
+    document.getElementById('btnUnpin').style.display = 'inline-block';
+    
+    // Expand corresponding year in Amortization table and scroll to it
+    const year = Math.ceil(pinnedMonth / 12);
+    expandedYears.add(year);
+
+    renderChart();
+    updateMilestoneTable(pinnedMonth);
+    renderAmortizationSchedule();
+
+    const targetRow = document.getElementById(`schedule-row-m-${pinnedMonth}`);
+    if (targetRow) {
+      targetRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function clearPinnedPeriod() {
+    pinnedMonth = null;
+    document.getElementById('pinBadge').textContent = 'Hover or click to pin milestone';
+    document.getElementById('pinBadge').classList.remove('pinned');
+    document.getElementById('btnUnpin').style.display = 'none';
+    renderChart();
+    updateMilestoneTable(12);
+    renderAmortizationSchedule();
+  }
+
+  // ===================================================================
+  // 6. POINT-IN-TIME MILESTONE BREAKDOWN TABLE
+  // ===================================================================
+  function updateMilestoneTable(targetMonth = null) {
+    const d = simulationData;
+    const m = targetMonth !== null ? targetMonth : (pinnedMonth !== null ? pinnedMonth : 12);
+    const validM = Math.max(1, Math.min(d.totalMonths, m));
+    const yr = Math.ceil(validM / 12);
+    const mInYr = ((validM - 1) % 12) + 1;
+
+    const pill = document.getElementById('milestonePill');
+    const isPinned = pinnedMonth !== null;
+    pill.textContent = `${isPinned ? '📌 Pinned: ' : 'Scrubbing: '}Month ${validM} (Year ${yr}, Mo ${mInYr})`;
+    if (isPinned) pill.classList.add('pinned');
+    else pill.classList.remove('pinned');
+
+    const baseM = d.baselineMonthly[validM];
+    const accelM = d.accelMonthly[validM];
+
+    const balDiff = baseM.endingBalance - accelM.endingBalance;
+    const intDiff = baseM.cumulativeInterest - accelM.cumulativeInterest;
+    const pmtDiff = accelM.payment - baseM.payment;
+
+    const tbody = document.getElementById('milestoneTableBody');
+    tbody.innerHTML = `
+      <tr>
+        <td><strong>Remaining Loan Balance</strong></td>
+        <td>${fmtCurrency(baseM.endingBalance)}</td>
+        <td class="${accelM.endingBalance < baseM.endingBalance ? 'highlight-green' : ''}">
+          ${fmtCurrency(accelM.endingBalance)}
+        </td>
+        <td class="highlight-green">-${fmtCurrency(balDiff)} equity ahead</td>
+      </tr>
+      <tr>
+        <td><strong>Monthly Payment at Period</strong></td>
+        <td>${fmtCurrency(baseM.payment)}</td>
+        <td>
+          ${fmtCurrency(accelM.payment)}
+          <span style="font-size:11px; color:var(--on-surface-de-emphasis);">
+            (P&I: ${fmtCurrency(accelM.payment - accelM.extraPrincipal)}${accelM.recurringExtra > 0 ? ` + Recur: ${fmtCurrency(accelM.recurringExtra)}` : ''}${accelM.oneTimeExtra > 0 ? ` + Lump: ${fmtCurrency(accelM.oneTimeExtra)}` : ''}${accelM.extraPrincipal > 0 && !accelM.recurringExtra && !accelM.oneTimeExtra ? ` + Extra: ${fmtCurrency(accelM.extraPrincipal)}` : ''})
+          </span>
+        </td>
+        <td>${pmtDiff > 0 ? `+${fmtCurrency(pmtDiff)}/mo` : '$0'}</td>
+      </tr>
+      <tr>
+        <td><strong>Interest Paid in This Month</strong></td>
+        <td>${fmtCurrency(baseM.interestPaid)}</td>
+        <td class="${accelM.interestPaid < baseM.interestPaid ? 'highlight-green' : ''}">${fmtCurrency(accelM.interestPaid)}</td>
+        <td class="highlight-green">-${fmtCurrency(baseM.interestPaid - accelM.interestPaid)} saved/mo</td>
+      </tr>
+      <tr>
+        <td><strong>Principal Paid in This Month</strong></td>
+        <td>${fmtCurrency(baseM.principalPaid)}</td>
+        <td>${fmtCurrency(accelM.principalPaid + accelM.extraPrincipal)}</td>
+        <td class="highlight-green">+${fmtCurrency(accelM.principalPaid + accelM.extraPrincipal - baseM.principalPaid)} principal/mo</td>
+      </tr>
+      <tr>
+        <td><strong>Total Cumulative Interest to Date</strong></td>
+        <td>${fmtCurrency(baseM.cumulativeInterest)}</td>
+        <td class="highlight-green">${fmtCurrency(accelM.cumulativeInterest)}</td>
+        <td class="highlight-green"><strong>${fmtCurrency(intDiff)} saved so far</strong></td>
+      </tr>
+      <tr>
+        <td><strong>Total Cumulative Principal Paid</strong></td>
+        <td>${fmtCurrency(baseM.cumulativePrincipal)}</td>
+        <td class="highlight-green">${fmtCurrency(accelM.cumulativePrincipal)}</td>
+        <td class="highlight-green">+${fmtCurrency(accelM.cumulativePrincipal - baseM.cumulativePrincipal)} added equity</td>
+      </tr>
+      <tr>
+        <td><strong>Payoff Status</strong></td>
+        <td>${baseM.endingBalance <= 0 ? 'Fully Paid Off' : `Active (${d.termYears * 12 - validM} mos remaining)`}</td>
+        <td class="highlight-green">
+          ${accelM.endingBalance <= 0 ? '✨ Fully Paid Off!' : `Active (${Math.max(0, d.payoffMonth - validM)} mos to payoff)`}
+        </td>
+        <td class="highlight-green"><strong>Payoff in Yr ${Math.floor(d.payoffMonth/12)} Mo ${d.payoffMonth%12}</strong></td>
+      </tr>
+    `;
+  }
+
+  // ===================================================================
+  // 7. CORE SLIDERS & PARAMETERS
+  // ===================================================================
+  const sliderConfig = [
+    { key: 'principal', label: 'Loan Principal Balance', min: 50000, max: 1500000, step: 10000, format: 'currency' },
+    { key: 'rate', label: 'Mortgage APR (%)', min: 2.5, max: 12.0, step: 0.125, format: 'percent' },
+    { key: 'years', label: 'Loan Term (Years)', min: 5, max: 40, step: 1, format: 'number' }
+  ];
+
+  function renderCoreSliders() {
+    const container = document.getElementById('coreSlidersGrid');
+    container.replaceChildren();
+
+    sliderConfig.forEach(cfg => {
+      const row = document.createElement('div');
+      row.className = 'slider-row';
+
+      const labelRow = document.createElement('div');
+      labelRow.className = 'slider-label-row';
+      const label = document.createElement('span');
+      label.className = 'slider-label';
+      label.textContent = cfg.label;
+      labelRow.appendChild(label);
+
+      const ctrl = document.createElement('div');
+      ctrl.className = 'slider-control';
+
+      const range = document.createElement('input');
+      range.type = 'range';
+      range.min = cfg.min;
+      range.max = cfg.max;
+      range.step = cfg.step;
+      range.value = coreParams[cfg.key];
+      range.dataset.param = cfg.key;
+
+      const text = document.createElement('input');
+      text.type = 'text';
+      text.className = 'slider-value';
+      text.dataset.display = cfg.key;
+      text.value = cfg.format === 'currency' ? fmtCurrency(coreParams[cfg.key]) : (cfg.format === 'percent' ? coreParams[cfg.key] + '%' : coreParams[cfg.key]);
+
+      function updateRangeProgress() {
+        const pct = ((range.value - cfg.min) / (cfg.max - cfg.min)) * 100;
+        range.style.setProperty('--progress', `${pct}%`);
+      }
+      updateRangeProgress();
+
+      range.addEventListener('input', () => {
+        const val = parseFloat(range.value);
+        coreParams[cfg.key] = val;
+        text.value = cfg.format === 'currency' ? fmtCurrency(val) : (cfg.format === 'percent' ? val + '%' : val);
+        updateRangeProgress();
+        scheduleRecalculate(true);
+      });
+
+      text.addEventListener('change', () => {
+        let val = parseFloat(text.value.replace(/[^0-9.]/g, ''));
+        if (isNaN(val)) val = cfg.min;
+        val = Math.max(cfg.min, Math.min(cfg.max, val));
+        coreParams[cfg.key] = val;
+        range.value = val;
+        text.value = cfg.format === 'currency' ? fmtCurrency(val) : (cfg.format === 'percent' ? val + '%' : val);
+        updateRangeProgress();
+        scheduleRecalculate(true);
+      });
+
+      ctrl.append(range, text);
+      row.append(labelRow, ctrl);
+      container.appendChild(row);
+    });
+  }
+
+  // ===================================================================
+  // 8. MULTI-TIER PREPAYMENT MANAGER (Option 1 a)
+  // ===================================================================
+  function renderTiers() {
+    const container = document.getElementById('tiersListContainer');
+    container.replaceChildren();
+
+    if (prepaymentTiers.length === 0) {
+      container.innerHTML = `
+        <div style="font-size:13px; color:var(--on-surface-de-emphasis); padding:12px; text-align:center;">
+          No prepayment tiers active. Standard amortization applies without extra monthly principal.
+        </div>
+      `;
+      return;
+    }
+
+    prepaymentTiers.forEach((tier, index) => {
+      const isOneTime = tier.type === 'one_time';
+      const row = document.createElement('div');
+      row.className = 'tier-row';
+
+      // Badge
+      const badge = document.createElement('div');
+      badge.className = 'tier-badge';
+      if (isOneTime) {
+        badge.style.background = 'var(--secondary-container)';
+        badge.style.color = 'var(--secondary)';
+        badge.textContent = `Lump Sum #${index + 1}`;
+      } else {
+        badge.textContent = `Tier ${index + 1}`;
+      }
+
+      // Type Selector Dropdown
+      const typeSelect = document.createElement('select');
+      typeSelect.className = 'tier-type-select';
+      typeSelect.innerHTML = `
+        <option value="recurring" ${!isOneTime ? 'selected' : ''}>Monthly Recurring</option>
+        <option value="one_time" ${isOneTime ? 'selected' : ''}>One-Time Lump Sum</option>
+      `;
+      typeSelect.addEventListener('change', () => {
+        tier.type = typeSelect.value;
+        if (tier.type === 'one_time') {
+          tier.year = tier.startYear || 1;
+          tier.month = 1;
+          tier.amount = tier.extraMonthly ? tier.extraMonthly * 5 : 5000;
+        } else {
+          tier.startYear = tier.year || 1;
+          tier.endYear = tier.year || 1;
+          tier.extraMonthly = tier.amount ? Math.round(tier.amount / 12) : 1000;
+        }
+        renderTiers();
+        scheduleRecalculate(true);
+      });
+
+      const inputs = document.createElement('div');
+      inputs.style.display = 'flex';
+      inputs.style.alignItems = 'center';
+      inputs.style.gap = '8px';
+      inputs.style.flexWrap = 'wrap';
+
+      const summary = document.createElement('div');
+      summary.className = 'tier-summary';
+
+      if (!isOneTime) {
+        // Recurring Tier Inputs
+        // Start Year
+        const grpFrom = document.createElement('div');
+        grpFrom.className = 'tier-input-group';
+        grpFrom.innerHTML = `<span>From Year:</span>`;
+        const inputStart = document.createElement('input');
+        inputStart.type = 'number';
+        inputStart.className = 'tier-num-input';
+        inputStart.min = 1;
+        inputStart.max = coreParams.years;
+        inputStart.value = tier.startYear || 1;
+        inputStart.addEventListener('change', () => {
+          tier.startYear = Math.max(1, Math.min(coreParams.years, parseInt(inputStart.value) || 1));
+          if (tier.endYear < tier.startYear) tier.endYear = tier.startYear;
+          renderTiers();
+          scheduleRecalculate(true);
+        });
+        grpFrom.appendChild(inputStart);
+
+        // End Year
+        const grpTo = document.createElement('div');
+        grpTo.className = 'tier-input-group';
+        grpTo.innerHTML = `<span>To Year:</span>`;
+        const inputEnd = document.createElement('input');
+        inputEnd.type = 'number';
+        inputEnd.className = 'tier-num-input';
+        inputEnd.min = tier.startYear || 1;
+        inputEnd.max = coreParams.years;
+        inputEnd.value = tier.endYear || tier.startYear || 1;
+        inputEnd.addEventListener('change', () => {
+          tier.endYear = Math.max(tier.startYear || 1, Math.min(coreParams.years, parseInt(inputEnd.value) || tier.startYear || 1));
+          renderTiers();
+          scheduleRecalculate(true);
+        });
+        grpTo.appendChild(inputEnd);
+
+        // Extra Amount
+        const grpAmt = document.createElement('div');
+        grpAmt.className = 'tier-input-group';
+        grpAmt.innerHTML = `<span>Extra Principal:</span>`;
+        const inputAmt = document.createElement('input');
+        inputAmt.type = 'text';
+        inputAmt.className = 'tier-amt-input';
+        inputAmt.value = fmtCurrency(tier.extraMonthly || 0);
+        inputAmt.addEventListener('focus', () => {
+          inputAmt.value = tier.extraMonthly || 0;
+          setTimeout(() => inputAmt.select(), 0);
+        });
+        inputAmt.addEventListener('change', () => {
+          const val = parseFloat(inputAmt.value.replace(/[^0-9.]/g, '')) || 0;
+          tier.extraMonthly = Math.max(0, val);
+          inputAmt.value = fmtCurrency(tier.extraMonthly);
+          scheduleRecalculate(true);
+        });
+        inputAmt.addEventListener('blur', () => {
+          inputAmt.value = fmtCurrency(tier.extraMonthly || 0);
+        });
+        grpAmt.append(inputAmt, document.createTextNode('/ mo'));
+
+        inputs.append(grpFrom, grpTo, grpAmt);
+
+        const monthsInTier = ((tier.endYear || 1) - (tier.startYear || 1) + 1) * 12;
+        const totalTierExtra = monthsInTier * (tier.extraMonthly || 0);
+        summary.textContent = `+${fmtCurrency(totalTierExtra)} total extra`;
+      } else {
+        // One-Time Lump Sum Inputs
+        // Year
+        const grpYr = document.createElement('div');
+        grpYr.className = 'tier-input-group';
+        grpYr.innerHTML = `<span>At Year:</span>`;
+        const inputYr = document.createElement('input');
+        inputYr.type = 'number';
+        inputYr.className = 'tier-num-input';
+        inputYr.min = 1;
+        inputYr.max = coreParams.years;
+        inputYr.value = tier.year || 1;
+        inputYr.addEventListener('change', () => {
+          tier.year = Math.max(1, Math.min(coreParams.years, parseInt(inputYr.value) || 1));
+          renderTiers();
+          scheduleRecalculate(true);
+        });
+        grpYr.appendChild(inputYr);
+
+        // Month (1-12)
+        const grpMo = document.createElement('div');
+        grpMo.className = 'tier-input-group';
+        grpMo.innerHTML = `<span>Month (1-12):</span>`;
+        const inputMo = document.createElement('input');
+        inputMo.type = 'number';
+        inputMo.className = 'tier-num-input';
+        inputMo.min = 1;
+        inputMo.max = 12;
+        inputMo.value = tier.month || 1;
+        inputMo.addEventListener('change', () => {
+          tier.month = Math.max(1, Math.min(12, parseInt(inputMo.value) || 1));
+          renderTiers();
+          scheduleRecalculate(true);
+        });
+        grpMo.appendChild(inputMo);
+
+        // Lump Sum Amount
+        const grpAmt = document.createElement('div');
+        grpAmt.className = 'tier-input-group';
+        grpAmt.innerHTML = `<span>Lump Sum:</span>`;
+        const inputAmt = document.createElement('input');
+        inputAmt.type = 'text';
+        inputAmt.className = 'tier-amt-input';
+        inputAmt.value = fmtCurrency(tier.amount || 0);
+        inputAmt.addEventListener('focus', () => {
+          inputAmt.value = tier.amount || 0;
+          setTimeout(() => inputAmt.select(), 0);
+        });
+        inputAmt.addEventListener('change', () => {
+          const val = parseFloat(inputAmt.value.replace(/[^0-9.]/g, '')) || 0;
+          tier.amount = Math.max(0, val);
+          inputAmt.value = fmtCurrency(tier.amount);
+          scheduleRecalculate(true);
+        });
+        inputAmt.addEventListener('blur', () => {
+          inputAmt.value = fmtCurrency(tier.amount || 0);
+        });
+        grpAmt.appendChild(inputAmt);
+
+        inputs.append(grpYr, grpMo, grpAmt);
+
+        const absMonth = ((tier.year || 1) - 1) * 12 + (tier.month || 1);
+        summary.textContent = `Paid in Month ${absMonth} (+${fmtCurrency(tier.amount || 0)})`;
+      }
+
+      // Remove button
+      const btnRemove = document.createElement('button');
+      btnRemove.className = 'btn-remove-tier';
+      btnRemove.innerHTML = '✕';
+      btnRemove.title = 'Remove Entry';
+      btnRemove.onclick = () => {
+        prepaymentTiers = prepaymentTiers.filter(t => t.id !== tier.id);
+        renderTiers();
+        scheduleRecalculate(true);
+      };
+
+      row.append(badge, typeSelect, inputs, summary, btnRemove);
+      container.appendChild(row);
+    });
+  }
+
+  function addNewTier(type = 'recurring') {
+    if (type === 'one_time') {
+      const defaultYr = prepaymentTiers.length > 0
+        ? Math.min(coreParams.years, Math.max(...prepaymentTiers.map(t => t.year || t.endYear || 1)))
+        : 1;
+      prepaymentTiers.push({
+        id: Date.now() + Math.random(),
+        type: 'one_time',
+        year: defaultYr,
+        month: 6,
+        amount: 10000
+      });
+    } else {
+      const nextStart = prepaymentTiers.length > 0
+        ? Math.min(coreParams.years, Math.max(...prepaymentTiers.map(t => t.endYear || t.year || 1)) + 1)
+        : 1;
+      const nextEnd = Math.min(coreParams.years, nextStart);
+      prepaymentTiers.push({
+        id: Date.now() + Math.random(),
+        type: 'recurring',
+        startYear: nextStart,
+        endYear: nextEnd,
+        extraMonthly: 1500
+      });
+    }
+    renderTiers();
+    scheduleRecalculate(true);
+  }
+
+  function resetDefaultTiers() {
+    prepaymentTiers = [
+      { id: 1, type: 'recurring', startYear: 1, endYear: 1, extraMonthly: 2000 },
+      { id: 2, type: 'recurring', startYear: 2, endYear: 2, extraMonthly: 3000 },
+      { id: 3, type: 'one_time', year: 2, month: 6, amount: 10000 }
+    ];
+    renderTiers();
+    scheduleRecalculate(true);
+  }
+
+  // ===================================================================
+  // 9. DYNAMIC AMORTIZATION SCHEDULE TABLE (Option 2 c + Annual Lazy Expansion)
+  // ===================================================================
+  function setScheduleView(viewMode) {
+    activeScheduleView = viewMode;
+    document.getElementById('btnViewRollup').classList.toggle('active', viewMode === 'rollup');
+    document.getElementById('btnViewMonthly').classList.toggle('active', viewMode === 'monthly');
+    renderAmortizationSchedule();
+  }
+
+  function toggleYearExpansion(year) {
+    if (expandedYears.has(year)) {
+      expandedYears.delete(year);
+    } else {
+      expandedYears.add(year);
+    }
+    renderAmortizationSchedule();
+  }
+
+  function renderAmortizationSchedule() {
+    const tbody = document.getElementById('scheduleTableBody');
+    tbody.replaceChildren();
+
+    const d = simulationData;
+    const isRollup = activeScheduleView === 'rollup';
+
+    if (isRollup) {
+      // Annual Rollup with lazy monthly expansion
+      d.annualRollup.forEach(yrData => {
+        const isExpanded = expandedYears.has(yrData.year);
+        const a = yrData.accelerated;
+
+        const trAnnual = document.createElement('tr');
+        trAnnual.className = 'annual-row';
+        trAnnual.onclick = () => toggleYearExpansion(yrData.year);
+
+        const yrLumpBadge = (a.oneTimeExtra && a.oneTimeExtra > 0) ? `<span class="badge-lump-sum">incl. ${fmtCurrency(a.oneTimeExtra)} lump sum</span>` : '';
+        trAnnual.innerHTML = `
+          <td>
+            <span class="expand-icon ${isExpanded ? 'open' : ''}">▶</span>
+            <strong>Year ${yrData.year}</strong>
+          </td>
+          <td>${fmtCurrency(a.payment)}</td>
+          <td>${fmtCurrency(a.principalPaid)}</td>
+          <td class="highlight-green">${a.extraPrincipal > 0 ? '+' + fmtCurrency(a.extraPrincipal) + yrLumpBadge : '$0'}</td>
+          <td>${fmtCurrency(a.interestPaid)}</td>
+          <td><strong>${fmtCurrency(a.endingBalance)}</strong></td>
+          <td>${fmtCurrency(a.cumulativeInterest)}</td>
+        `;
+        tbody.appendChild(trAnnual);
+
+        // If expanded, render 12 monthly rows lazily
+        if (isExpanded) {
+          for (let m = yrData.startMonth; m <= yrData.endMonth; m++) {
+            const mData = d.accelMonthly[m];
+            if (!mData) continue;
+            const trMonth = document.createElement('tr');
+            trMonth.className = 'monthly-row';
+            trMonth.id = `schedule-row-m-${m}`;
+            if (pinnedMonth === m) trMonth.classList.add('selected-row');
+
+            trMonth.onclick = (e) => {
+              e.stopPropagation();
+              setPinnedPeriod(m);
+            };
+
+            const moLumpBadge = (mData.oneTimeExtra && mData.oneTimeExtra > 0) ? `<span class="badge-lump-sum">+${fmtCurrency(mData.oneTimeExtra)} lump sum</span>` : '';
+            trMonth.innerHTML = `
+              <td>Mo ${mData.month} (Yr ${mData.year})</td>
+              <td>${fmtCurrency(mData.payment)}</td>
+              <td>${fmtCurrency(mData.principalPaid)}</td>
+              <td class="highlight-green">${mData.extraPrincipal > 0 ? '+' + fmtCurrency(mData.extraPrincipal) + moLumpBadge : '$0'}</td>
+              <td>${fmtCurrency(mData.interestPaid)}</td>
+              <td>${fmtCurrency(mData.endingBalance)}</td>
+              <td>${fmtCurrency(mData.cumulativeInterest)}</td>
+            `;
+            tbody.appendChild(trMonth);
+          }
+        }
+      });
+    } else {
+      // Full Monthly Ledger (All 360 periods)
+      for (let m = 1; m <= d.totalMonths; m++) {
+        const mData = d.accelMonthly[m];
+        const trMonth = document.createElement('tr');
+        trMonth.className = 'monthly-row';
+        trMonth.id = `schedule-row-m-${m}`;
+        if (pinnedMonth === m) trMonth.classList.add('selected-row');
+
+        trMonth.onclick = () => setPinnedPeriod(m);
+
+        const moLumpBadge = (mData.oneTimeExtra && mData.oneTimeExtra > 0) ? `<span class="badge-lump-sum">+${fmtCurrency(mData.oneTimeExtra)} lump sum</span>` : '';
+        trMonth.innerHTML = `
+          <td>Mo ${mData.month} (Yr ${mData.year})</td>
+          <td>${fmtCurrency(mData.payment)}</td>
+          <td>${fmtCurrency(mData.principalPaid)}</td>
+          <td class="highlight-green">${mData.extraPrincipal > 0 ? '+' + fmtCurrency(mData.extraPrincipal) + moLumpBadge : '$0'}</td>
+          <td>${fmtCurrency(mData.interestPaid)}</td>
+          <td>${fmtCurrency(mData.endingBalance)}</td>
+          <td>${fmtCurrency(mData.cumulativeInterest)}</td>
+        `;
+        tbody.appendChild(trMonth);
+      }
+    }
+  }
+
+  function exportScheduleCSV() {
+    const d = simulationData;
+    let csv = 'Month,Year,BeginningBalance,MonthlyPayment,RegularPrincipal,RecurringExtra,OneTimeExtra,TotalExtraPrincipal,InterestPaid,EndingBalance,CumulativeInterest\n';
+
+    for (let m = 1; m <= d.totalMonths; m++) {
+      const a = d.accelMonthly[m];
+      csv += `${a.month},${a.year},${a.beginningBalance.toFixed(2)},${a.payment.toFixed(2)},${a.principalPaid.toFixed(2)},${(a.recurringExtra || 0).toFixed(2)},${(a.oneTimeExtra || 0).toFixed(2)},${a.extraPrincipal.toFixed(2)},${a.interestPaid.toFixed(2)},${a.endingBalance.toFixed(2)},${a.cumulativeInterest.toFixed(2)}\n`;
+    }
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `TAPE_amortization_schedule_${coreParams.principal}_${coreParams.rate}pct.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // ===================================================================
+  // 10. STATE BROADCAST & EMBED PROTOCOL
+  // ===================================================================
+  function broadcastState() {
+    const state = {
+      coreParams: { ...coreParams },
+      prepaymentTiers: [...prepaymentTiers],
+      pinnedMonth
+    };
+    window.parent.postMessage({
+      type: 'WIDGET_STATE_UPDATE',
+      widgetType: 'TAPE-mortgage-acceleration',
+      payload: JSON.stringify(state)
+    }, '*');
+  }
+
+  window.addEventListener('message', (event) => {
+    if (event.data?.type === 'RESTORE_STATE') {
+      try {
+        const raw = event.data.state || event.data.payload;
+        const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+        if (parsed?.coreParams) Object.assign(coreParams, parsed.coreParams);
+        if (Array.isArray(parsed?.prepaymentTiers)) prepaymentTiers = parsed.prepaymentTiers;
+        if (typeof parsed?.pinnedMonth === 'number') pinnedMonth = parsed.pinnedMonth;
+        renderCoreSliders();
+        renderTiers();
+        recalculate(false);
+      } catch (e) {}
+    }
+  });
+
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    renderChart();
+  });
+
+  window.addEventListener('resize', () => {
+    renderChart();
+  });
+
+  const resizeObserver = new ResizeObserver(() => {
+    window.parent.postMessage({
+      type: 'widget-resize',
+      height: document.body.scrollHeight
+    }, '*');
+  });
+  resizeObserver.observe(document.body);
+
+  // ===================================================================
+  // INITIALIZATION
+  // ===================================================================
+  renderCoreSliders();
+  renderTiers();
+  recalculate(false);
+</script>
+</body>
+</html>
