@@ -20,7 +20,8 @@
     @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght,ROND@100..900,0..100&display=swap');
 
     /* Design System Tokens */
-    :root {
+    :root,
+    [data-theme="light"] {
       --ff-sans: 'Google Sans Flex', 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       --ff-mono: 'SF Mono', 'Menlo', 'Consolas', monospace;
       --fw-normal: 400;
@@ -72,7 +73,7 @@
     }
 
     @media (prefers-color-scheme: dark) {
-      :root {
+      :root:not([data-theme="light"]) {
         --surface: #0b0f19;
         --surface-bright: #131b2e;
         --surface-dim: #090d16;
@@ -106,6 +107,41 @@
         --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
         --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
       }
+    }
+
+    [data-theme="dark"] {
+      --surface: #0b0f19;
+      --surface-bright: #131b2e;
+      --surface-dim: #090d16;
+      --surface-container: #162036;
+      --surface-container-high: #1e2c4a;
+      --surface-container-highest: #28395e;
+      --surface-container-low: #0f172a;
+      --surface-container-lowest: #070a10;
+      --on-surface-default: #f8fafc;
+      --on-surface-de-emphasis: #94a3b8;
+      --on-surface-primary: #60a5fa;
+      --primary: #60a5fa;
+      --on-primary: #0f172a;
+      --primary-container: #1e3a8a;
+      --on-primary-container: #dbeafe;
+      --outline: #64748b;
+      --outline-variant: #334155;
+      --stroke-default: #1e293b;
+      --stroke-emphasis: #64748b;
+      --positive: #34d399;
+      --positive-bg: #064e3b;
+      --negative: #f87171;
+      --warning: #fbbf24;
+      --chart-1: #60a5fa;
+      --chart-2: #34d399;
+      --chart-3: #fbbf24;
+      --chart-4: #f87171;
+      --chart-pinned: #a78bfa;
+      --chart-accent: #fbbf24;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
     }
 
     * {
@@ -159,6 +195,41 @@
       font-weight: var(--fw-semibold);
       letter-spacing: -0.5px;
       color: var(--on-surface-default);
+    }
+
+    .header-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theme-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: var(--fw-medium);
+      font-family: var(--ff-sans);
+      color: var(--on-surface-de-emphasis);
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--stroke-default);
+      background: var(--surface-bright);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .theme-toggle-btn:hover {
+      color: var(--on-surface-default);
+      border-color: var(--outline);
+      background: var(--surface-container);
+    }
+
+    .theme-toggle-icon {
+      font-size: 14px;
+      line-height: 1;
+      display: inline-block;
     }
 
     .github-repo-link {
@@ -593,37 +664,72 @@
     }
 
     input[type="range"]::-webkit-slider-runnable-track {
-      height: 4px;
+      height: 8px;
       background: linear-gradient(to right,
           var(--primary) 0%, var(--primary) var(--progress, 50%),
-          var(--surface-container-high) var(--progress, 50%), var(--surface-container-high) 100%);
+          var(--surface-container-highest) var(--progress, 50%), var(--surface-container-highest) 100%);
       border-radius: 999px;
+      border: 1px solid var(--outline-variant);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 18px;
-      height: 18px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
-      background: var(--surface-bright);
-      border: 3px solid var(--primary);
+      background: #ffffff;
+      border: 3.5px solid var(--primary);
       box-sizing: border-box;
       margin-top: -7px;
       cursor: pointer;
-      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-      transition: transform 0.1s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
     }
 
     input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.15);
+      transform: scale(1.18);
+      box-shadow: 0 0 0 5px var(--primary-container), 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    input[type="range"]::-moz-range-track {
+      height: 8px;
+      background: var(--surface-container-highest);
+      border-radius: 999px;
+      border: 1px solid var(--outline-variant);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    input[type="range"]::-moz-range-progress {
+      height: 8px;
+      background: var(--primary);
+      border-radius: 999px;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 3.5px solid var(--primary);
+      box-sizing: border-box;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="range"]::-moz-range-thumb:hover {
+      transform: scale(1.18);
+      box-shadow: 0 0 0 5px var(--primary-container), 0 2px 6px rgba(0, 0, 0, 0.4);
     }
 
     .slider-value {
       font-size: 14px;
       font-weight: var(--fw-medium);
       font-family: var(--ff-sans);
-      width: 88px;
+      width: 104px;
+      min-width: 104px;
       flex-shrink: 0;
       text-align: right;
       font-variant-numeric: tabular-nums;
@@ -1005,15 +1111,21 @@
     <div class="widget-header">
       <div class="header-top">
         <h1 class="widget-title">T.A.P.E.</h1>
-        <a href="https://github.com/techiknow/tape" target="_blank" rel="noopener noreferrer" class="github-repo-link"
-          title="View Source on GitHub">
-          <svg viewBox="0 0 16 16" aria-hidden="true">
-            <path
-              d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
-            </path>
-          </svg>
-          <span>GitHub</span>
-        </a>
+        <div class="header-actions">
+          <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle light or dark theme" title="Toggle theme">
+            <span class="theme-toggle-icon" id="themeToggleIcon">☀️</span>
+            <span class="theme-toggle-label" id="themeToggleLabel">Light</span>
+          </button>
+          <a href="https://github.com/techiknow/tape" target="_blank" rel="noopener noreferrer" class="github-repo-link"
+            title="View Source on GitHub">
+            <svg viewBox="0 0 16 16" aria-hidden="true">
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+              </path>
+            </svg>
+            <span>GitHub</span>
+          </a>
+        </div>
       </div>
       <div class="widget-subtitle">Tiered Amortization & Prepayment Engine • Discrete Multi-Tier Mortgage Acceleration
         Simulator</div>
@@ -1047,8 +1159,8 @@
     <!-- Core Loan Parameters -->
     <div class="section-card" id="coreParamsCard">
       <div class="section-title">Core Loan Parameters</div>
-      <div class="section-desc">Adjust baseline mortgage balance, interest APR, term amortization length, and annual
-        escrow carry (property taxes & homeowners insurance).</div>
+      <div class="section-desc">Adjust baseline mortgage balance, interest APR, term amortization length, annual
+        escrow carry (property taxes & homeowners insurance), and additional monthly recurring expenses.</div>
       <div class="slider-grid" id="coreSlidersGrid">
         <!-- Sliders injected dynamically -->
       </div>
@@ -1198,7 +1310,8 @@
       rate: 7.75,
       years: 30,
       propertyTax: 4800,
-      homeInsurance: 1200
+      homeInsurance: 1200,
+      additionalExpenses: 0
     };
 
     // Multi-tier extra monthly principal configuration
@@ -1271,14 +1384,15 @@
     // ===================================================================
     // 2. DISCRETE DETERMINISTIC SIMULATION ENGINE
     // ===================================================================
-    function computeAmortizationSchedule(principal, rate, termYears, tiers, propertyTax = 4800, homeInsurance = 1200) {
+    function computeAmortizationSchedule(principal, rate, termYears, tiers, propertyTax = 4800, homeInsurance = 1200, additionalExpenses = 0) {
       const totalMonths = Math.max(1, Math.round(termYears * 12));
       const monthlyRate = rate > 0 ? (rate / 100) / 12 : 0;
 
-      // Monthly Escrow Breakdown (Taxes & Homeowners Insurance carry)
+      // Monthly Escrow Breakdown (Taxes, Insurance & Additional Expenses carry)
       const monthlyTax = (Number(propertyTax) || 0) / 12;
       const monthlyIns = (Number(homeInsurance) || 0) / 12;
-      const monthlyEscrow = monthlyTax + monthlyIns;
+      const monthlyAdd = Number(additionalExpenses) || 0;
+      const monthlyEscrow = monthlyTax + monthlyIns + monthlyAdd;
 
       // Standard fixed monthly payment (P&I)
       let baseMonthlyPayment = 0;
@@ -1527,8 +1641,9 @@
       if (!isPaidOff) payoffMonth = totalMonths;
 
       // Annual Rollup Aggregations
+      const rollupYears = Math.max(1, Math.ceil(totalMonths / 12));
       const annualRollup = [];
-      for (let y = 1; y <= termYears; y++) {
+      for (let y = 1; y <= rollupYears; y++) {
         const startM = (y - 1) * 12 + 1;
         const endM = Math.min(y * 12, totalMonths);
 
@@ -1586,6 +1701,7 @@
         totalMonths,
         monthlyPropertyTax: monthlyTax,
         monthlyHomeInsurance: monthlyIns,
+        monthlyAdditionalExpenses: monthlyAdd,
         monthlyEscrow,
         baseMonthlyPayment,
         baseMonthlyPITI,
@@ -1622,7 +1738,8 @@
         coreParams.years,
         prepaymentTiers,
         coreParams.propertyTax,
-        coreParams.homeInsurance
+        coreParams.homeInsurance,
+        coreParams.additionalExpenses
       );
 
       // 2. Validate pinned selection bound
@@ -1647,7 +1764,7 @@
     function updateSummaryCards() {
       const d = simulationData;
       document.getElementById('sumLoanPrincipal').textContent = fmtCurrency(d.principal);
-      document.getElementById('sumAprBadge').textContent = `${d.rate}% APR • ${d.termYears} Yrs`;
+      document.getElementById('sumAprBadge').textContent = `${d.rate}% APR • ${d.termYears === 0 ? '1 Mo (0 Yrs)' : d.termYears + ' Yrs'}`;
 
       const sumPitiSub = document.getElementById('sumPitiSub');
       if (sumPitiSub) {
@@ -1656,7 +1773,7 @@
 
       const payoffYears = Math.floor(d.payoffMonth / 12);
       const payoffMonths = d.payoffMonth % 12;
-      const payoffStr = payoffMonths > 0 ? `${payoffYears} yrs ${payoffMonths} mos` : `${payoffYears} yrs`;
+      const payoffStr = d.payoffMonth === 0 ? '0 mos' : (payoffYears > 0 ? (payoffMonths > 0 ? `${payoffYears} yrs ${payoffMonths} mos` : `${payoffYears} yrs`) : `${payoffMonths} mo${payoffMonths > 1 ? 's' : ''}`);
       document.getElementById('sumAccelPayoff').textContent = payoffStr;
 
       const savedYears = Math.floor(d.monthsSaved / 12);
@@ -1767,6 +1884,16 @@
         }, `Yr ${yr}`));
         svg.appendChild(createSvgNode('line', {
           x1: x, y1: PAD.top + plotH, x2: x, y2: PAD.top + plotH + 5,
+          stroke: 'var(--outline-variant)', 'stroke-width': 1
+        }));
+      }
+      if (d.termYears === 0) {
+        svg.appendChild(createSvgNode('text', {
+          x: xPos(1), y: PAD.top + plotH + 22, 'text-anchor': 'middle',
+          class: 'axis-tick'
+        }, 'Mo 1'));
+        svg.appendChild(createSvgNode('line', {
+          x1: xPos(1), y1: PAD.top + plotH, x2: xPos(1), y2: PAD.top + plotH + 5,
           stroke: 'var(--outline-variant)', 'stroke-width': 1
         }));
       }
@@ -2043,9 +2170,9 @@
         <td>${pmtDiff > 0 ? `+${fmtCurrency(pmtDiff)}/mo` : '$0'}</td>
       </tr>
       <tr>
-        <td><strong>Monthly Escrow Carry (Taxes & Ins)</strong></td>
-        <td>${fmtCurrency(baseM.escrow)}/mo <span style="font-size:11px; color:var(--on-surface-de-emphasis);">(${fmtCurrency((coreParams.propertyTax || 0) / 12)} Tax + ${fmtCurrency((coreParams.homeInsurance || 0) / 12)} Ins)</span></td>
-        <td>${fmtCurrency(accelM.escrow)}/mo <span style="font-size:11px; color:var(--on-surface-de-emphasis);">(${fmtCurrency((coreParams.propertyTax || 0) / 12)} Tax + ${fmtCurrency((coreParams.homeInsurance || 0) / 12)} Ins)</span></td>
+        <td><strong>Monthly Escrow & Carry (Taxes, Ins, Add'l)</strong></td>
+        <td>${fmtCurrency(baseM.escrow)}/mo <span style="font-size:11px; color:var(--on-surface-de-emphasis);">(${fmtCurrency((coreParams.propertyTax || 0) / 12)} Tax + ${fmtCurrency((coreParams.homeInsurance || 0) / 12)} Ins${coreParams.additionalExpenses ? ` + ${fmtCurrency(coreParams.additionalExpenses)} Exp` : ''})</span></td>
+        <td>${fmtCurrency(accelM.escrow)}/mo <span style="font-size:11px; color:var(--on-surface-de-emphasis);">(${fmtCurrency((coreParams.propertyTax || 0) / 12)} Tax + ${fmtCurrency((coreParams.homeInsurance || 0) / 12)} Ins${coreParams.additionalExpenses ? ` + ${fmtCurrency(coreParams.additionalExpenses)} Exp` : ''})</span></td>
         <td><span style="color:var(--on-surface-de-emphasis);">$0 (Non-amortizing)</span></td>
       </tr>
       <tr>
@@ -2088,10 +2215,41 @@
     // ===================================================================
     const sliderConfig = [
       { key: 'principal', label: 'Loan Principal Balance', min: 50000, max: 1500000, step: 10000, format: 'currency' },
-      { key: 'rate', label: 'Mortgage APR (%)', min: 2.5, max: 12.0, step: 0.125, format: 'percent' },
-      { key: 'years', label: 'Loan Term (Years)', min: 5, max: 40, step: 1, format: 'number' },
-      { key: 'propertyTax', label: 'Annual Property Taxes ($/yr)', min: 0, max: 30000, step: 100, format: 'currency' },
-      { key: 'homeInsurance', label: 'Annual Homeowners Insurance ($/yr)', min: 0, max: 12000, step: 50, format: 'currency' }
+      {
+        key: 'rate',
+        label: 'Mortgage APR (%)',
+        min: 0,
+        max: 400,
+        sliderMin: 0,
+        sliderMax: 100,
+        sliderStep: 0.1,
+        toSlider: (r) => (r <= 20 ? (r / 20) * 70 : 70 + Math.sqrt(Math.max(0, r - 20) / 380) * 30),
+        fromSlider: (p) => {
+          if (p <= 70) return Math.round((p / 70) * 20 * 8) / 8;
+          const t = (p - 70) / 30;
+          return Math.round((20 + (t * t) * 380) * 10) / 10;
+        },
+        format: 'percent'
+      },
+      { key: 'years', label: 'Loan Term (Years)', min: 0, max: 40, step: 1, format: 'number' },
+      {
+        key: 'propertyTax',
+        label: 'Annual Property Taxes ($/yr)',
+        min: 0,
+        max: 10000000,
+        sliderMin: 0,
+        sliderMax: 100,
+        sliderStep: 0.1,
+        toSlider: (t) => (t <= 50000 ? (t / 50000) * 70 : 70 + Math.sqrt(Math.max(0, t - 50000) / 9950000) * 30),
+        fromSlider: (p) => {
+          if (p <= 70) return Math.round(((p / 70) * 50000) / 100) * 100;
+          const t = (p - 70) / 30;
+          return Math.round((50000 + (t * t) * 9950000) / 5000) * 5000;
+        },
+        format: 'currency'
+      },
+      { key: 'homeInsurance', label: 'Annual Homeowners Insurance ($/yr)', min: 0, max: 12000, step: 50, format: 'currency' },
+      { key: 'additionalExpenses', label: 'Additional Monthly Expenses ($/mo)', min: 0, max: 20000, step: 25, format: 'currency' }
     ];
 
     function getSliderTelemetry(key) {
@@ -2105,13 +2263,19 @@
         const pct = coreParams.principal > 0 ? ((coreParams.homeInsurance || 0) / coreParams.principal) * 100 : 0;
         return `${fmtCurrency(mo)}/mo • ${pct.toFixed(2)}% of loan`;
       }
+      if (key === 'additionalExpenses') {
+        const mo = Number(coreParams.additionalExpenses || 0);
+        return `${fmtCurrency(mo * 12)}/yr carry`;
+      }
       if (key === 'principal') {
         return `${fmtCurrency(coreParams.principal)} balance`;
       }
       if (key === 'rate') {
+        if (coreParams.rate === 0) return '0.000%/mo (0% APR free)';
         return `${(coreParams.rate / 12).toFixed(3)}%/mo rate`;
       }
       if (key === 'years') {
+        if (coreParams.years === 0) return '1 mo immediate payoff';
         return `${coreParams.years * 12} payments`;
       }
       return '';
@@ -2149,28 +2313,34 @@
         const ctrl = document.createElement('div');
         ctrl.className = 'slider-control';
 
+        const sMin = cfg.sliderMin !== undefined ? cfg.sliderMin : cfg.min;
+        const sMax = cfg.sliderMax !== undefined ? cfg.sliderMax : cfg.max;
+        const sStep = cfg.sliderStep !== undefined ? cfg.sliderStep : cfg.step;
+
         const range = document.createElement('input');
         range.type = 'range';
-        range.min = cfg.min;
-        range.max = cfg.max;
-        range.step = cfg.step;
-        range.value = coreParams[cfg.key];
+        range.min = sMin;
+        range.max = sMax;
+        range.step = sStep;
+        const curVal = coreParams[cfg.key];
+        range.value = cfg.toSlider ? cfg.toSlider(curVal) : curVal;
         range.dataset.param = cfg.key;
 
         const text = document.createElement('input');
         text.type = 'text';
         text.className = 'slider-value';
         text.dataset.display = cfg.key;
-        text.value = cfg.format === 'currency' ? fmtCurrency(coreParams[cfg.key]) : (cfg.format === 'percent' ? coreParams[cfg.key] + '%' : coreParams[cfg.key]);
+        text.value = cfg.format === 'currency' ? fmtCurrency(curVal) : (cfg.format === 'percent' ? curVal + '%' : curVal);
 
         function updateRangeProgress() {
-          const pct = ((range.value - cfg.min) / (cfg.max - cfg.min)) * 100;
+          const pct = ((range.value - sMin) / (sMax - sMin)) * 100;
           range.style.setProperty('--progress', `${pct}%`);
         }
         updateRangeProgress();
 
         range.addEventListener('input', () => {
-          const val = parseFloat(range.value);
+          const rawVal = parseFloat(range.value);
+          const val = cfg.fromSlider ? cfg.fromSlider(rawVal) : rawVal;
           coreParams[cfg.key] = val;
           text.value = cfg.format === 'currency' ? fmtCurrency(val) : (cfg.format === 'percent' ? val + '%' : val);
           updateRangeProgress();
@@ -2183,7 +2353,7 @@
           if (isNaN(val)) val = cfg.min;
           val = Math.max(cfg.min, Math.min(cfg.max, val));
           coreParams[cfg.key] = val;
-          range.value = val;
+          range.value = cfg.toSlider ? cfg.toSlider(val) : val;
           text.value = cfg.format === 'currency' ? fmtCurrency(val) : (cfg.format === 'percent' ? val + '%' : val);
           updateRangeProgress();
           updateAllSliderSubtexts();
@@ -2744,8 +2914,61 @@
       }
     });
 
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-      renderChart();
+    // ===================================================================
+    // 11. THEME CONTROLLER & PREFERENCE PERSISTENCE
+    // ===================================================================
+    function getSystemTheme() {
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+
+    function applyTheme(theme, save = true) {
+      document.documentElement.setAttribute('data-theme', theme);
+      if (save) {
+        try {
+          localStorage.setItem('tape-theme', theme);
+        } catch (e) { }
+      }
+      const icon = document.getElementById('themeToggleIcon');
+      const label = document.getElementById('themeToggleLabel');
+      if (theme === 'dark') {
+        if (icon) icon.textContent = '🌙';
+        if (label) label.textContent = 'Dark';
+      } else {
+        if (icon) icon.textContent = '☀️';
+        if (label) label.textContent = 'Light';
+      }
+      if (simulationData) {
+        renderChart();
+      }
+    }
+
+    function initTheme() {
+      let saved = null;
+      try {
+        saved = localStorage.getItem('tape-theme');
+      } catch (e) { }
+      const current = saved || getSystemTheme();
+      applyTheme(current, false);
+    }
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme') || getSystemTheme();
+      const next = current === 'dark' ? 'light' : 'dark';
+      applyTheme(next, true);
+    }
+
+    document.getElementById('themeToggleBtn')?.addEventListener('click', toggleTheme);
+
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      let saved = null;
+      try {
+        saved = localStorage.getItem('tape-theme');
+      } catch (err) { }
+      if (!saved) {
+        applyTheme(e.matches ? 'dark' : 'light', false);
+      } else {
+        renderChart();
+      }
     });
 
     window.addEventListener('resize', () => {
@@ -2763,6 +2986,7 @@
     // ===================================================================
     // INITIALIZATION
     // ===================================================================
+    initTheme();
     renderCoreSliders();
     renderTiers();
     recalculate(false);
