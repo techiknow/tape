@@ -5,7 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src data:; script-src 'unsafe-inline'; connect-src 'none';">
+    content="default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data:; script-src 'unsafe-inline'; connect-src 'none';">
+  <link rel="icon" type="image/png" href="icon.png">
   <title>T.A.P.E. - Tiered Amortization & Prepayment Engine</title>
   <style>
     /* Google Sans Font Loading */
@@ -188,6 +189,26 @@
       justify-content: space-between;
       align-items: center;
       gap: 12px;
+    }
+
+    .header-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .widget-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      object-fit: contain;
+      flex-shrink: 0;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.15s ease;
+    }
+
+    .widget-logo:hover {
+      transform: scale(1.06);
     }
 
     .widget-title {
@@ -1110,7 +1131,10 @@
     <!-- Header -->
     <div class="widget-header">
       <div class="header-top">
-        <h1 class="widget-title">T.A.P.E.</h1>
+        <div class="header-brand">
+          <img src="icon.png" class="widget-logo" alt="T.A.P.E. Logo" width="36" height="36">
+          <h1 class="widget-title">T.A.P.E.</h1>
+        </div>
         <div class="header-actions">
           <button type="button" class="theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle light or dark theme" title="Toggle theme">
             <span class="theme-toggle-icon" id="themeToggleIcon">☀️</span>
