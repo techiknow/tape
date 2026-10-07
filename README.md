@@ -9,12 +9,13 @@ A zero-dependency, client-side mortgage acceleration simulator designed to model
 ## Features
 
 - **Discrete Simulation Engine**: Month-by-month deterministic calculation ($r = \text{APR}/1200$) with terminal balance clamping.
+- **PITI & Escrow Carry Modeling**: Integrated Annual Property Taxes and Homeowners Insurance parameters with dynamic %-of-loan telemetry and monthly PITI outflow breakdowns.
 - **Polymorphic Prepayment Scheduler**:
-  - **Recurring Monthly Tiers**: Custom prepayment schedules spanning arbitrary year intervals (e.g. Year 1: +$2,000/mo, Year 2: +$3,000/mo).
+  - **Recurring Tiers (Years & Weeks)**: Custom intervals defined by loan years or discrete week spans with live calendar decomposition telemetry (e.g., `433 weeks → 8 years, 4 months, 1 week`) and frequency toggles (`$/wk` or `$/mo`).
   - **One-Time Lump Sums**: Discrete capital injections targeting any specific Year and Month.
 - **Dual Trajectory SVG Chart**: Plots Remaining Debt Balance and Cumulative Interest Paid simultaneously on an auto-ranging unified vertical scale.
 - **Milestone Inspector**: Interactive scrub and click-to-pin crosshair with two-way chart-to-table synchronization.
-- **Amortization Ledger**: Annual rollup view with lazy 12-month accordion expansion and RFC-4180 CSV export.
+- **Expanded Amortization Ledger**: 880px height view with annual rollup, lazy 12-month accordion expansion, 9-column PITI/Escrow ledger, and RFC-4180 CSV export.
 - **Zero Dependencies**: Pure HTML, CSS, and Vanilla JavaScript with strict CSP compliance.
 
 ---
