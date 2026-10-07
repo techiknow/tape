@@ -1174,9 +1174,9 @@
     <div class="summary-grid" id="summaryGrid">
       <div class="summary-card">
         <div class="summary-label">Initial Loan Principal</div>
-        <div class="summary-val" id="sumLoanPrincipal">$400,000</div>
-        <div class="summary-badge blue" id="sumAprBadge">7.75% APR • 30 Yrs</div>
-        <div class="summary-subtext" id="sumPitiSub">Base P&I: $2,864/mo • PITI: $3,364/mo</div>
+        <div class="summary-val" id="sumLoanPrincipal">$450,000</div>
+        <div class="summary-badge blue" id="sumAprBadge">6.875% APR • 15 Yrs</div>
+        <div class="summary-subtext" id="sumPitiSub">Base P&I: $4,013/mo • PITI: $5,513/mo</div>
       </div>
       <div class="summary-card">
         <div class="summary-label">Accelerated Payoff</div>
@@ -1347,11 +1347,11 @@
     // 1. STATE & DATA INITIALIZATION
     // ===================================================================
     const coreParams = {
-      principal: 400000,
-      rate: 7.75,
-      years: 30,
-      propertyTax: 4800,
-      homeInsurance: 1200,
+      principal: 450000,
+      rate: 6.875,
+      years: 15,
+      propertyTax: 11000,
+      homeInsurance: 7000,
       additionalExpenses: 0
     };
 
@@ -1361,8 +1361,9 @@
     // One-time: { id, type: 'one_time', year, month, amount }
     // Recast: { id, type: 'recast', year, month, lumpSum }
     let prepaymentTiers = [
-      { id: 1, type: 'recurring', intervalUnit: 'years', startYear: 1, endYear: 1, extraMonthly: 2000 },
-      { id: 2, type: 'recurring', intervalUnit: 'years', startYear: 2, endYear: 2, extraMonthly: 3000 }
+      { id: 1, type: 'recast', year: 1, month: 2, lumpSum: 150000 },
+      { id: 2, type: 'recurring', intervalUnit: 'years', startYear: 1, endYear: 6, extraMonthly: 2000 },
+      { id: 3, type: 'one_time', year: 2, month: 4, amount: 15000 }
     ];
 
     // Selection & inspection state
@@ -2941,8 +2942,9 @@
 
     function resetDefaultTiers() {
       prepaymentTiers = [
-        { id: 1, type: 'recurring', intervalUnit: 'years', startYear: 1, endYear: 1, extraMonthly: 2000 },
-        { id: 2, type: 'recurring', intervalUnit: 'weeks', startWeek: 53, endWeek: 433, amountFreq: 'week', extraAmount: 500 }
+        { id: 1, type: 'recast', year: 1, month: 2, lumpSum: 150000 },
+        { id: 2, type: 'recurring', intervalUnit: 'years', startYear: 1, endYear: 7, extraMonthly: 2000 },
+        { id: 3, type: 'one_time', year: 2, month: 4, amount: 15000 }
       ];
       renderTiers();
       scheduleRecalculate(true);
